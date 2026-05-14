@@ -38,21 +38,6 @@ changelog:
       - "^test:"
       - "^chore:"
 
-brews:
-  - name: ani
-    repository:
-      owner: pavelsimo
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
-    homepage: https://github.com/pavelsimo/ani
-    description: Browse and search AniList anime from your terminal.
-    license: MIT
-    install: |
-      bin.install "ani"
-    test: |
-      system "#{bin}/ani", "version"
-
 release:
   github:
     owner: pavelsimo

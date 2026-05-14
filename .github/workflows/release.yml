@@ -13,6 +13,8 @@ jobs:
     name: GoReleaser
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,6 +25,10 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Get tag
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -31,4 +37,72 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  update-homebrew-tap:
+    name: Update Homebrew Tap
+    runs-on: ubuntu-latest
+    needs: goreleaser
+    if: ${{ !contains(needs.goreleaser.outputs.tag, '-') }}
+    steps:
+      - name: Update formula
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ needs.goreleaser.outputs.tag }}
+        run: |
+          VERSION="${TAG#v}"
+          REPO="pavelsimo/ani"
+          BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
+
+          curl -sL "${BASE_URL}/checksums.txt" -o /tmp/checksums.txt
+
+          SHA_DARWIN_ARM64=$(grep "ani_darwin_arm64.tar.gz" /tmp/checksums.txt | awk '{print $1}')
+          SHA_DARWIN_AMD64=$(grep "ani_darwin_amd64.tar.gz" /tmp/checksums.txt | awk '{print $1}')
+          SHA_LINUX_ARM64=$(grep "ani_linux_arm64.tar.gz"   /tmp/checksums.txt | awk '{print $1}')
+          SHA_LINUX_AMD64=$(grep "ani_linux_amd64.tar.gz"   /tmp/checksums.txt | awk '{print $1}')
+
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/pavelsimo/homebrew-tap.git" /tmp/tap
+          mkdir -p /tmp/tap/Formula
+
+          cat > /tmp/tap/Formula/ani.rb << FORMULA
+          class Ani < Formula
+            desc "Browse and search AniList anime from your terminal"
+            homepage "https://github.com/pavelsimo/ani"
+            license "MIT"
+            version "${VERSION}"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "${BASE_URL}/ani_darwin_arm64.tar.gz"
+                sha256 "${SHA_DARWIN_ARM64}"
+              else
+                url "${BASE_URL}/ani_darwin_amd64.tar.gz"
+                sha256 "${SHA_DARWIN_AMD64}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "${BASE_URL}/ani_linux_arm64.tar.gz"
+                sha256 "${SHA_LINUX_ARM64}"
+              else
+                url "${BASE_URL}/ani_linux_amd64.tar.gz"
+                sha256 "${SHA_LINUX_AMD64}"
+              end
+            end
+
+            def install
+              bin.install "ani"
+            end
+
+            test do
+              system "#{bin}/ani", "version"
+            end
+          end
+          FORMULA
+
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/ani.rb
+          git diff --cached --quiet || git commit -m "Update ani to ${TAG}"
+          git push
