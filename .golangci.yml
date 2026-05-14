@@ -31,13 +31,13 @@ linters:
         - name: exported
           arguments:
             - disableStutteringCheck
-
-issues:
   exclusions:
     rules:
       - path: _test\.go
         linters:
           - gosec
           - errcheck
+
+issues:
   max-issues-per-linter: 0
   max-same-issues: 0
