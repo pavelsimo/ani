@@ -1,0 +1,37 @@
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
+
+var rootCmd = &cobra.Command{
+	Use:          "ani",
+	Short:        "browse and search AniList anime from your terminal",
+	SilenceUsage: true,
+}
+
+// Execute is the entry point called from main.
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func init() {
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolP("quiet", "q", false, "suppress non-essential output")
+	rootCmd.PersistentFlags().Bool("json", false, "output as JSON")
+	rootCmd.PersistentFlags().Bool("no-color", false, "disable color output")
+	rootCmd.PersistentFlags().String("lang", "romaji", "title language: romaji or english")
+
+	// Respect NO_COLOR env variable.
+	if os.Getenv("NO_COLOR") != "" {
+		_ = rootCmd.PersistentFlags().Set("no-color", "true")
+	}
+}
+
+func exitError(msg string) {
+	fmt.Fprintln(os.Stderr, "error: "+msg)
+	os.Exit(1)
+}
