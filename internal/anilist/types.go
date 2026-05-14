@@ -36,7 +36,7 @@ type FuzzyDate struct {
 
 // AiringEpisode holds next-airing information.
 type AiringEpisode struct {
-	Episode        int `json:"episode"`
+	Episode         int `json:"episode"`
 	TimeUntilAiring int `json:"timeUntilAiring"`
 }
 

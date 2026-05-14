@@ -43,10 +43,10 @@ type Model struct {
 	height    int
 	activeTab int
 
-	media    [tabCount][]anilist.Media
-	loading  [tabCount]bool
-	err      [tabCount]error
-	cursor   [tabCount]int
+	media   [tabCount][]anilist.Media
+	loading [tabCount]bool
+	err     [tabCount]error
+	cursor  [tabCount]int
 
 	searchMode  bool
 	searchInput textinput.Model
@@ -344,18 +344,4 @@ func Start(client *anilist.Client, lang string) error {
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	_, err := p.Run()
 	return err
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }

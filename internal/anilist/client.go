@@ -32,8 +32,8 @@ type gqlRequest struct {
 }
 
 type gqlResponse struct {
-	Data   json.RawMessage  `json:"data"`
-	Errors []gqlError       `json:"errors,omitempty"`
+	Data   json.RawMessage `json:"data"`
+	Errors []gqlError      `json:"errors,omitempty"`
 }
 
 type gqlError struct {
