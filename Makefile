@@ -12,7 +12,7 @@ GOIMPORTS_VERSION     := v0.29.0
 
 build: ## Build binary to bin/
 	@mkdir -p $(BUILD_DIR)
-	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./...
+	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) .
 
 install: ## Install binary to $GOPATH/bin
 	go install $(LDFLAGS) ./...
