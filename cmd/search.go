@@ -24,15 +24,15 @@ var searchCmd = &cobra.Command{
 		format, _ := cmd.Flags().GetString("format")
 		status, _ := cmd.Flags().GetString("status")
 		minScore, _ := cmd.Flags().GetInt("min-score")
-		page, _ := cmd.Flags().GetInt("page")
+		page, _ := cmd.Flags().GetInt(keyPage)
 		perPage, _ := cmd.Flags().GetInt("per-page")
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
 		lang, _ := cmd.Flags().GetString("lang")
 
 		vars := map[string]any{
-			"page":    page,
-			"perPage": perPage,
+			keyPage:    page,
+			keyPerPage: perPage,
 		}
 
 		if len(args) > 0 {
@@ -99,7 +99,7 @@ func init() {
 	searchCmd.Flags().String("format", "", "format: tv, ova, ona, movie, special")
 	searchCmd.Flags().String("status", "", "status: airing, finished, upcoming")
 	searchCmd.Flags().Int("min-score", 0, "minimum average score (0-100)")
-	searchCmd.Flags().Int("page", 1, "page number")
+	searchCmd.Flags().Int(keyPage, 1, "page number")
 	searchCmd.Flags().Int("per-page", 20, "results per page (max 50)")
 	rootCmd.AddCommand(searchCmd)
 }

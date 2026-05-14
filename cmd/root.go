@@ -1,10 +1,14 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+)
+
+const (
+	keyPage    = "page"
+	keyPerPage = "perPage"
 )
 
 var rootCmd = &cobra.Command{
@@ -29,9 +33,4 @@ func init() {
 	if os.Getenv("NO_COLOR") != "" {
 		_ = rootCmd.PersistentFlags().Set("no-color", "true")
 	}
-}
-
-func exitError(msg string) {
-	fmt.Fprintln(os.Stderr, "error: "+msg)
-	os.Exit(1)
 }

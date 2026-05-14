@@ -18,7 +18,7 @@ var topCmd = &cobra.Command{
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		limit, _ := cmd.Flags().GetInt("limit")
-		page, _ := cmd.Flags().GetInt("page")
+		page, _ := cmd.Flags().GetInt(keyPage)
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
 		lang, _ := cmd.Flags().GetString("lang")
@@ -30,8 +30,8 @@ var topCmd = &cobra.Command{
 
 		client := anilist.New()
 		result, err := client.Query(context.Background(), anilist.QueryTop, map[string]any{
-			"page":    page,
-			"perPage": perPage,
+			keyPage:    page,
+			keyPerPage: perPage,
 		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
@@ -48,6 +48,6 @@ var topCmd = &cobra.Command{
 
 func init() {
 	topCmd.Flags().Int("limit", 20, "number of results (max 50 per page)")
-	topCmd.Flags().Int("page", 1, "page number")
+	topCmd.Flags().Int(keyPage, 1, "page number")
 	rootCmd.AddCommand(topCmd)
 }

@@ -20,7 +20,7 @@ var popularCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		season, _ := cmd.Flags().GetString("season")
 		year, _ := cmd.Flags().GetInt("year")
-		page, _ := cmd.Flags().GetInt("page")
+		page, _ := cmd.Flags().GetInt(keyPage)
 		perPage, _ := cmd.Flags().GetInt("per-page")
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
@@ -40,8 +40,8 @@ var popularCmd = &cobra.Command{
 		result, err := client.Query(context.Background(), anilist.QueryPopularSeason, map[string]any{
 			"season":     strings.ToUpper(season),
 			"seasonYear": year,
-			"page":       page,
-			"perPage":    perPage,
+			keyPage:      page,
+			keyPerPage:   perPage,
 		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
@@ -59,7 +59,7 @@ var popularCmd = &cobra.Command{
 func init() {
 	popularCmd.Flags().String("season", "", "season: winter, spring, summer, fall (default: current)")
 	popularCmd.Flags().Int("year", 0, "year (default: current year)")
-	popularCmd.Flags().Int("page", 1, "page number")
+	popularCmd.Flags().Int(keyPage, 1, "page number")
 	popularCmd.Flags().Int("per-page", 20, "results per page (max 50)")
 	rootCmd.AddCommand(popularCmd)
 }

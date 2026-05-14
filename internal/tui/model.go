@@ -71,6 +71,7 @@ func New(client *anilist.Client, lang string) Model {
 	return m
 }
 
+// Init implements tea.Model.
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick,
@@ -78,6 +79,7 @@ func (m Model) Init() tea.Cmd {
 	)
 }
 
+// Update implements tea.Model.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
@@ -166,6 +168,7 @@ func (m *Model) handleSearchKey(msg tea.KeyMsg) []tea.Cmd {
 	return cmds
 }
 
+// View implements tea.Model.
 func (m Model) View() string {
 	if m.width == 0 {
 		return ""

@@ -17,7 +17,7 @@ var upcomingCmd = &cobra.Command{
 	Short:        "Show upcoming anime not yet airing",
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		page, _ := cmd.Flags().GetInt("page")
+		page, _ := cmd.Flags().GetInt(keyPage)
 		perPage, _ := cmd.Flags().GetInt("per-page")
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
@@ -25,8 +25,8 @@ var upcomingCmd = &cobra.Command{
 
 		client := anilist.New()
 		result, err := client.Query(context.Background(), anilist.QueryUpcoming, map[string]any{
-			"page":    page,
-			"perPage": perPage,
+			keyPage:    page,
+			keyPerPage: perPage,
 		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
@@ -42,7 +42,7 @@ var upcomingCmd = &cobra.Command{
 }
 
 func init() {
-	upcomingCmd.Flags().Int("page", 1, "page number")
+	upcomingCmd.Flags().Int(keyPage, 1, "page number")
 	upcomingCmd.Flags().Int("per-page", 20, "results per page (max 50)")
 	rootCmd.AddCommand(upcomingCmd)
 }
