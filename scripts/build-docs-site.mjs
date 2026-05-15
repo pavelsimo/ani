@@ -137,8 +137,7 @@ function parse(src) {
         inFence=true; fLang=line.slice(3).trim(); fLines=[];
       } else {
         const body=highlight(fLang,fLines.join("\n"));
-        const label=fLang?`<span class="code-lang">${fLang}</span>`:"";
-        out.push(`<div class="code-wrap">${label}<pre><code>${body}</code></pre>`+
+        out.push(`<div class="code-wrap"><pre><code>${body}</code></pre>`+
           `<button class="copy-btn">Copy</button></div>`);
         inFence=false; fLines=[];
       }
@@ -530,11 +529,6 @@ code{
 
 /* ── Code blocks ────────────────────────────────────── */
 .code-wrap{position:relative;margin:1.25rem 0}
-.code-lang{
-  position:absolute;top:.5rem;left:1rem;
-  font-family:var(--font-mono);font-size:.7rem;
-  color:#7c8597;text-transform:lowercase;letter-spacing:.04em;pointer-events:none;
-}
 pre{
   background:var(--code-bg);border:1px solid var(--code-border);
   border-radius:8px;padding:14px 18px;
