@@ -12,9 +12,9 @@
  */
 
 import {
-  readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync,
+  readFileSync, writeFileSync, mkdirSync, existsSync,
 } from "fs";
-import { join, basename, extname } from "path";
+import { join, basename } from "path";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -227,14 +227,27 @@ function tocHtml(toc) {
 }
 
 function sidebarHtml(pages, currentSlug) {
-  const links=pages.map(({slug,label})=>
-    `<li><a href="${slug}.html"${slug===currentSlug?' class="active"':""}>${label}</a></li>`
-  ).join("\n");
+  const slugSection = {};
+  for (const [sectionLabel, files] of sections) {
+    for (const f of files) slugSection[basename(f, ".md")] = sectionLabel;
+  }
+
+  let items = "", lastSection = null;
+  for (const { slug, label } of pages) {
+    const sec = slugSection[slug];
+    if (sec !== lastSection) {
+      items += `<li class="sidebar-section">${esc(sec)}</li>\n`;
+      lastSection = sec;
+    }
+    const active = slug === currentSlug ? ' class="active"' : "";
+    items += `<li><a href="${slug}.html"${active}>${esc(label)}</a></li>\n`;
+  }
+
   return `<nav class="sidebar" id="sidebar" aria-label="Site navigation">
   <div class="sidebar-brand">
     <a href="index.html" class="brand-link">${TOOL}</a>
   </div>
-  <ul class="sidebar-nav">${links}</ul>
+  <ul class="sidebar-nav">${items}</ul>
   <div class="sidebar-footer">
     <a href="${REPO_URL}" target="_blank" rel="noopener" class="gh-link">
       <svg height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -250,7 +263,7 @@ function heroHtml() {
   <h1 class="hero-title">${TOOL}</h1>
   <p class="hero-desc">${esc(DESC)}</p>
   <div class="hero-actions">
-    <a class="btn-primary" href="#installation">Get started</a>
+    <a class="btn-primary" href="install.html">Get started</a>
     <a class="btn-outline" href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
   </div>
   <div class="install-cmd">
@@ -355,6 +368,17 @@ hr{border:none;border-top:1px solid var(--border);margin:2rem 0}
 }
 .sidebar-nav a:hover{background:var(--surface2);color:var(--text);text-decoration:none}
 .sidebar-nav a.active{background:var(--surface2);color:var(--accent);font-weight:600}
+.sidebar-section{
+  padding:.6rem .75rem .2rem;
+  font-size:.7rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--muted);
+  pointer-events:none;
+  margin-top:.5rem;
+}
+.sidebar-section:first-child{margin-top:0}
 .sidebar-footer{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
 .gh-link{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted)}
 .gh-link:hover{color:var(--text);text-decoration:none}
@@ -554,31 +578,42 @@ if(tocLinks.length){
 </html>`;
 }
 
-// ── Build ─────────────────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────────────────
 
-const mdFiles = readdirSync(SRC)
-  .filter(f => extname(f) === ".md")
-  .sort((a,b) => {
-    if(a==="index.md") return -1;
-    if(b==="index.md") return 1;
-    return a.localeCompare(b);
-  });
+const sections = [
+  ["Get Started", ["index.md", "install.md", "quickstart.md"]],
+  ["Usage",       ["tui.md", "commands.md", "search.md"]],
+  ["Reference",   ["reference.md"]],
+];
+
+const LABELS = {
+  "index":      "Home",
+  "tui":        "TUI Guide",
+  "quickstart": "Quick Start",
+  "all-time":   "All Time",
+};
 
 function fileToLabel(filename) {
-  return basename(filename,".md")
-    .replace(/-/g," ")
-    .replace(/\b\w/g,c=>c.toUpperCase())
-    .replace(/^Index$/,"Home");
+  const slug = basename(filename, ".md");
+  if (LABELS[slug]) return LABELS[slug];
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const pages = mdFiles.map(f => ({
-  slug:  basename(f,".md"),
-  label: fileToLabel(f),
-  file:  f,
-}));
+const pages = sections.flatMap(([, files]) =>
+  files.map(f => ({ slug: basename(f, ".md"), label: fileToLabel(f), file: f }))
+);
+
+// ── Build ─────────────────────────────────────────────────────────────────────
 
 for(const {slug,label,file} of pages) {
-  const src    = readFileSync(join(SRC,file),"utf8");
+  const filePath = join(SRC, file);
+  if (!existsSync(filePath)) {
+    console.error(`  ERROR: docs/${file} not found — check sections array`);
+    process.exit(1);
+  }
+  const src    = readFileSync(filePath,"utf8");
   const {html,toc} = parse(src);
   const output = renderPage({
     slug, title:label, bodyHtml:html, toc, pages,
