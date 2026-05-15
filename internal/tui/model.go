@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	lipgloss "charm.land/lipgloss/v2"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -192,7 +193,7 @@ func (m Model) viewTabBar() string {
 			tabs[i] = tabInactive.Render(name)
 		}
 	}
-	bar := strings.Join(tabs, "")
+	bar := lipgloss.JoinHorizontal(lipgloss.Top, tabs...)
 	return tabBar.Width(m.width).Render(bar)
 }
 
