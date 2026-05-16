@@ -1,11 +1,11 @@
 package display
 
 import (
-	"fmt"
 	"strings"
 
 	"charm.land/lipgloss/v2"
 	"charm.land/lipgloss/v2/table"
+	"github.com/mattn/go-runewidth"
 
 	"github.com/pavelsimo/ani/internal/anilist"
 )
@@ -96,18 +96,18 @@ func renderPlain(headers []string, rows [][]string) string {
 	var sb strings.Builder
 	widths := make([]int, len(headers))
 	for i, h := range headers {
-		widths[i] = len(h)
+		widths[i] = runewidth.StringWidth(h)
 	}
 	for _, row := range rows {
 		for i, cell := range row {
-			if len(cell) > widths[i] {
-				widths[i] = len(cell)
+			if w := runewidth.StringWidth(cell); w > widths[i] {
+				widths[i] = w
 			}
 		}
 	}
 
 	for i, h := range headers {
-		fmt.Fprintf(&sb, "%-*s  ", widths[i], h)
+		sb.WriteString(PadRight(h, widths[i]) + "  ")
 	}
 	sb.WriteString("\n")
 	for _, w := range widths {
@@ -116,7 +116,7 @@ func renderPlain(headers []string, rows [][]string) string {
 	sb.WriteString("\n")
 	for _, row := range rows {
 		for i, cell := range row {
-			fmt.Fprintf(&sb, "%-*s  ", widths[i], cell)
+			sb.WriteString(PadRight(cell, widths[i]) + "  ")
 		}
 		sb.WriteString("\n")
 	}

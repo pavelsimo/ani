@@ -363,7 +363,7 @@ func (m Model) viewList(tab, height int) string {
 
 func (m Model) renderItem(media anilist.Media) string {
 	title := display.Truncate(display.Title(media, m.lang), 42)
-	score := display.Score(media.AverageScore)
+	score := display.PadRight(display.Score(media.AverageScore), 7)
 	users := display.Popularity(media.Popularity)
 	format := display.Format(media.Format)
 	status := display.Status(media.Status)
@@ -376,16 +376,16 @@ func (m Model) renderItem(media anilist.Media) string {
 		}
 		genreList := make([]string, len(max3))
 		copy(genreList, max3)
-		genres = "[" + strings.Join(genreList, "][") + "]"
+		genres = display.Truncate("["+strings.Join(genreList, "][")+"]", 30)
 	}
 
 	var right string
 	if m.mediaType == "MANGA" {
-		right = fmt.Sprintf("  %s   %s users   %s   %s   %s   %s",
+		right = fmt.Sprintf("  %s   %-6s users   %-8s   %-8s   %-8s   %s",
 			score, users, format,
 			display.Chapters(media.Chapters), display.Volumes(media.Volumes), status)
 	} else {
-		right = fmt.Sprintf("  %s   %s users   %s   %s eps   %s   %s",
+		right = fmt.Sprintf("  %s   %-6s users   %-8s   %-8s   %-9s   %s",
 			score, users, format,
 			display.Episodes(media.Episodes), status, display.NextEp(media.NextAiringEpisode))
 	}

@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/pavelsimo/ani/internal/anilist"
 )
 
@@ -222,6 +223,12 @@ func Source(s string) string {
 		}
 		return s
 	}
+}
+
+// PadRight pads s to exactly width terminal display columns using spaces.
+// It uses display width (emoji = 2 cols), not rune or byte count.
+func PadRight(s string, width int) string {
+	return runewidth.FillRight(s, width)
 }
 
 // Duration formats episode duration in minutes.

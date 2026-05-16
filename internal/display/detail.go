@@ -20,7 +20,7 @@ var (
 
 // DetailOptions controls how RenderDetailWithOptions renders a media entry.
 type DetailOptions struct {
-	Width     int    // synopsis wrap width; 0 uses 80
+	Width     int // synopsis wrap width; 0 uses 80
 	NoColor   bool
 	SkipTitle bool   // omit title block (e.g. TUI renders it separately)
 	MediaType string // "ANIME" or "MANGA"; defaults to ANIME

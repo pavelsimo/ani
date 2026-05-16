@@ -72,5 +72,4 @@ var (
 			BorderBottom(true).
 			BorderStyle(lipgloss.NormalBorder()).
 			BorderForeground(lipgloss.Color("#21262d"))
-
 )
