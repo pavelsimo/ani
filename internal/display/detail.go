@@ -155,6 +155,36 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 		sb.WriteString("\n")
 	}
 
+	// Recommendations
+	var recs []anilist.Recommendation
+	for _, r := range media.Recommendations {
+		if r.MediaRecommendation != nil {
+			recs = append(recs, r)
+		}
+	}
+	if len(recs) > 0 {
+		if opts.NoColor {
+			sb.WriteString("Recommendations:\n")
+		} else {
+			sb.WriteString(detailHdrStyle.Render("Recommendations") + "\n")
+		}
+		for _, r := range recs {
+			m := r.MediaRecommendation
+			title := TitleFromTitle(m.Title, lang)
+			meta := fmt.Sprintf("%s · %s", Format(m.Format), m.Type)
+			score := Score(m.AverageScore)
+			if opts.NoColor {
+				fmt.Fprintf(&sb, "  %-30s %-16s %s\n", title, meta, score)
+			} else {
+				fmt.Fprintf(&sb, "  %-30s %s   %s\n",
+					detailValueStyle.Render(title),
+					detailLabelStyle.Render(meta),
+					detailValueStyle.Render(score))
+			}
+		}
+		sb.WriteString("\n")
+	}
+
 	// Streaming links
 	var streamLinks []anilist.ExternalLink
 	for _, l := range media.ExternalLinks {

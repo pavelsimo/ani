@@ -88,6 +88,14 @@ query ($id: Int) {
       }
     }
     externalLinks { site url type }
+    recommendations(page: 1, perPage: 10, sort: RATING_DESC) {
+      nodes {
+        rating
+        mediaRecommendation {
+          id title { romaji english } type format status averageScore
+        }
+      }
+    }
   }
 }`
 

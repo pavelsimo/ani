@@ -23,13 +23,14 @@ type Media struct {
 	NextAiringEpisode *AiringEpisode `json:"nextAiringEpisode"`
 
 	// Detail-only fields (populated by QueryMedia, zero/nil from list queries).
-	Description   string         `json:"description,omitempty"`
-	Duration      *int           `json:"duration,omitempty"`
-	Source        string         `json:"source,omitempty"`
-	Studios       []Studio       `json:"studios,omitempty"`
-	Tags          []Tag          `json:"tags,omitempty"`
-	Relations     []RelationEdge `json:"relations,omitempty"`
-	ExternalLinks []ExternalLink `json:"externalLinks,omitempty"`
+	Description     string           `json:"description,omitempty"`
+	Duration        *int             `json:"duration,omitempty"`
+	Source          string           `json:"source,omitempty"`
+	Studios         []Studio         `json:"studios,omitempty"`
+	Tags            []Tag            `json:"tags,omitempty"`
+	Relations       []RelationEdge   `json:"relations,omitempty"`
+	ExternalLinks   []ExternalLink   `json:"externalLinks,omitempty"`
+	Recommendations []Recommendation `json:"recommendations,omitempty"`
 }
 
 // Studio represents an anime production studio.
@@ -79,6 +80,22 @@ type ExternalLink struct {
 	Site string `json:"site"`
 	URL  string `json:"url"`
 	Type string `json:"type"`
+}
+
+// Recommendation is a community-submitted recommendation for a media entry.
+type Recommendation struct {
+	Rating              int                  `json:"rating"`
+	MediaRecommendation *RecommendationMedia `json:"mediaRecommendation"`
+}
+
+// RecommendationMedia holds basic info about the recommended entry.
+type RecommendationMedia struct {
+	ID           int    `json:"id"`
+	Title        Title  `json:"title"`
+	Type         string `json:"type"`
+	Format       string `json:"format"`
+	Status       string `json:"status"`
+	AverageScore int    `json:"averageScore"`
 }
 
 // AiringEpisode holds next-airing information.
