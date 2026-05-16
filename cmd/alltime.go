@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -10,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pavelsimo/ani/internal/anilist"
-	"github.com/pavelsimo/ani/internal/display"
 )
 
 var alltimeCmd = &cobra.Command{
@@ -36,11 +34,7 @@ var alltimeCmd = &cobra.Command{
 			return err
 		}
 
-		if asJSON {
-			return json.NewEncoder(os.Stdout).Encode(result.Media)
-		}
-		fmt.Print(display.Render(result.Media, lang, noColor, mediaType))
-		return nil
+		return printMedia(result.Media, asJSON, lang, noColor, mediaType)
 	},
 }
 
