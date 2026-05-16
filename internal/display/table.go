@@ -28,7 +28,7 @@ var (
 // mediaType should be "ANIME" or "MANGA" and controls which columns are shown.
 func Render(media []anilist.Media, lang string, noColor bool, mediaType string) string {
 	if len(media) == 0 {
-		return "  no results found\n"
+		return "  no results found"
 	}
 
 	var headers []string
@@ -67,7 +67,7 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 	if noColor {
 		return renderPlain(headers, rows)
 	}
-	return renderStyled(headers, rows) + "\n"
+	return renderStyled(headers, rows)
 }
 
 func renderStyled(headers []string, rows [][]string) string {
@@ -120,7 +120,7 @@ func renderPlain(headers []string, rows [][]string) string {
 		}
 		sb.WriteString("\n")
 	}
-	return sb.String()
+	return strings.TrimRight(sb.String(), "\n")
 }
 
 func truncateGenres(genres []string, max int) string {
