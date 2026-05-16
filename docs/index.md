@@ -1,5 +1,5 @@
 ---
-title: ani
+title: 🌸 ani
 description: browse and search AniList anime from your terminal
 ---
 

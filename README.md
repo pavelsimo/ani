@@ -1,4 +1,4 @@
-# ani
+# 🌸 ani
 
 Browse and search AniList anime from your terminal.
 

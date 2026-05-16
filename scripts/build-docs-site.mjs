@@ -245,9 +245,7 @@ function sidebarHtml(pages, currentSlug) {
   return `<nav class="sidebar" id="sidebar" aria-label="Site navigation">
   <div class="sidebar-brand">
     <a href="index.html" class="brand-link">
-      <span class="brand-mark">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8z"/><path d="M8 6.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 018 6.5zM8 5a1 1 0 100-2 1 1 0 000 2z"/></svg>
-      </span>
+      <span class="brand-mark">🌸</span>
       ${TOOL}
     </a>
   </div>
@@ -269,7 +267,7 @@ function sidebarHtml(pages, currentSlug) {
 function heroHtml() {
   return `<section class="hero">
   <p class="hero-eyebrow">CLI Tool</p>
-  <h1 class="hero-title">${TOOL}</h1>
+  <h1 class="hero-title">🌸 ${TOOL}</h1>
   <p class="hero-desc">${esc(DESC)}</p>
   <div class="hero-actions">
     <a class="btn-primary" href="install.html">Get started</a>
