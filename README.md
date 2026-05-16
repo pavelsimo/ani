@@ -42,8 +42,11 @@ ani search "attack on titan"
 # Filter by genre and year
 ani search --genre Action --genre Drama --year 2024
 
-# Show popular anime this season
-ani popular
+# Show full details for a title by AniList ID
+ani info 1
+
+# Browse manga instead of anime
+ani trending --type manga
 
 # JSON output for scripting
 ani trending --json | jq '.[0].title.romaji'
@@ -54,20 +57,26 @@ ani trending --json | jq '.[0].title.romaji'
 | Command | Description |
 |---------|-------------|
 | `ani` | Open interactive TUI (tabs: Trending, Popular, Upcoming, All Time, Top 100, Search) |
-| `ani trending` | Currently trending anime |
-| `ani popular` | Popular anime this season |
-| `ani upcoming` | Upcoming anime not yet airing |
-| `ani all-time` | Most popular anime of all time |
-| `ani top` | Highest-scored anime |
+| `ani trending` | Currently trending anime or manga |
+| `ani popular` | Popular anime or manga this season |
+| `ani upcoming` | Upcoming titles not yet airing |
+| `ani all-time` | Most popular anime or manga of all time |
+| `ani top` | Highest-scored anime or manga |
 | `ani search <query>` | Search by title, genre, year, season, or format |
+| `ani info <id>` | Full details for a title by AniList ID |
 | `ani version` | Print version and exit |
+
+Use `--type manga` on any browse or search command to query manga instead of anime.
 
 ## TUI Keybindings
 
 | Key | Action |
 |-----|--------|
 | `↑` / `↓` / `j` / `k` | Navigate list |
-| `Tab` / `Shift+Tab` | Switch tabs |
+| `Tab` / `→` / `l` | Next tab |
+| `Shift+Tab` / `←` / `h` | Previous tab |
+| `Enter` | Open detail view |
+| `]` | Next page |
 | `/` | Open search input |
 | `r` | Refresh current tab |
 | `q` / `Ctrl+C` | Quit |
