@@ -104,7 +104,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.detailMode && m.detailMedia != nil {
 			m.vp.Width = m.detailVPWidth()
 			m.vp.Height = m.detailVPHeight()
-			m.vp.SetContent(m.renderDetailContent(*m.detailMedia))
+			m.vp.SetContent(display.RenderDetailWithOptions(*m.detailMedia, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true}))
 		}
 
 	case spinner.TickMsg:
@@ -124,7 +124,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.detailMedia = &msg.media
 			m.vp = viewport.New(m.detailVPWidth(), m.detailVPHeight())
-			m.vp.SetContent(m.renderDetailContent(msg.media))
+			m.vp.SetContent(display.RenderDetailWithOptions(msg.media, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true}))
 		}
 
 	case tea.KeyMsg:
@@ -473,88 +473,6 @@ func (m Model) viewDetail() string {
 			statusKey.Render("↑↓ j/k") + " scroll",
 	)
 	sb.WriteString(bar)
-	return sb.String()
-}
-
-func (m Model) renderDetailContent(media anilist.Media) string {
-	w := m.detailVPWidth()
-
-	var sb strings.Builder
-
-	// Info fields — single column, label padded to fixed width
-	type kv struct{ label, value string }
-	fields := []kv{
-		{"Format", display.Format(media.Format)},
-		{"Episodes", display.Episodes(media.Episodes)},
-		{"Status", display.Status(media.Status)},
-		{"Score", display.Score(media.AverageScore)},
-		{"Season", display.Season(media.Season, media.SeasonYear)},
-		{"Users", display.Popularity(media.Popularity)},
-		{"Studio", display.Studios(media.Studios)},
-		{"Source", display.Source(media.Source)},
-	}
-	if media.Duration != nil && *media.Duration > 0 {
-		fields = append(fields, kv{"Duration", display.Duration(media.Duration)})
-	}
-	for _, f := range fields {
-		label := fmt.Sprintf("%-11s", f.label+":")
-		sb.WriteString("  " + detailLabel.Render(label) + " " + detailValue.Render(f.value) + "\n")
-	}
-	sb.WriteString("\n")
-
-	// Genres
-	if len(media.Genres) > 0 {
-		sb.WriteString(detailSectionHdr.Render("Genres") + "\n")
-		for _, line := range strings.Split(display.RenderTags(media.Genres), "\n") {
-			if line != "" {
-				sb.WriteString("  " + line + "\n")
-			}
-		}
-		sb.WriteString("\n")
-	}
-
-	// Tags (top 5 non-spoiler)
-	tags := display.TopNonSpoilerTags(media.Tags, 5)
-	if len(tags) > 0 {
-		names := make([]string, len(tags))
-		for i, t := range tags {
-			names[i] = t.Name
-		}
-		sb.WriteString(detailSectionHdr.Render("Tags") + "\n")
-		for _, line := range strings.Split(display.RenderTags(names), "\n") {
-			if line != "" {
-				sb.WriteString("  " + line + "\n")
-			}
-		}
-		sb.WriteString("\n")
-	}
-
-	// Relations (ANIME only, meaningful types)
-	rels := display.AnimeRelations(media.Relations)
-	if len(rels) > 0 {
-		sb.WriteString(detailSectionHdr.Render("Relations") + "\n")
-		for _, r := range rels {
-			relType := display.FormatRelationType(r.RelationType)
-			title := display.TitleFromTitle(r.Node.Title, m.lang)
-			format := display.Format(r.Node.Format)
-			sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n",
-				detailLabel.Render(relType),
-				detailValue.Render(title),
-				detailLabel.Render(format)))
-		}
-		sb.WriteString("\n")
-	}
-
-	// Synopsis
-	if media.Description != "" {
-		sb.WriteString(detailSectionHdr.Render("Synopsis") + "\n")
-		synopsis := display.StripHTML(media.Description)
-		wrapped := display.WrapText(synopsis, w-2)
-		for _, line := range strings.Split(wrapped, "\n") {
-			sb.WriteString("  " + line + "\n")
-		}
-	}
-
 	return sb.String()
 }
 

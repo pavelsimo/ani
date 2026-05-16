@@ -13,8 +13,15 @@ var htmlTagRe = regexp.MustCompile(`<[^>]+>`)
 
 // Title returns the display title for a media entry based on the language preference.
 func Title(m anilist.Media, lang string) string {
-	if strings.ToLower(lang) == "english" && m.Title.English != "" {
-		return m.Title.English
+	switch strings.ToLower(lang) {
+	case "english":
+		if m.Title.English != "" {
+			return m.Title.English
+		}
+	case "native":
+		if m.Title.Native != "" {
+			return m.Title.Native
+		}
 	}
 	if m.Title.Romaji != "" {
 		return m.Title.Romaji
@@ -125,8 +132,15 @@ func Truncate(s string, maxLen int) string {
 
 // TitleFromTitle returns the display title from a Title struct.
 func TitleFromTitle(t anilist.Title, lang string) string {
-	if strings.ToLower(lang) == "english" && t.English != "" {
-		return t.English
+	switch strings.ToLower(lang) {
+	case "english":
+		if t.English != "" {
+			return t.English
+		}
+	case "native":
+		if t.Native != "" {
+			return t.Native
+		}
 	}
 	if t.Romaji != "" {
 		return t.Romaji

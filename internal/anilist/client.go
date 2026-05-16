@@ -67,6 +67,7 @@ type mediaDetailRaw struct {
 	Relations struct {
 		Edges []RelationEdge `json:"edges"`
 	} `json:"relations"`
+	ExternalLinks []ExternalLink `json:"externalLinks"`
 }
 
 type mediaData struct {
@@ -180,6 +181,7 @@ func (c *Client) QueryMedia(ctx context.Context, id int) (*Media, error) {
 		Studios:           raw.Studios.Nodes,
 		Tags:              raw.Tags,
 		Relations:         raw.Relations.Edges,
+		ExternalLinks:     raw.ExternalLinks,
 	}
 	return media, nil
 }

@@ -81,6 +81,7 @@ query ($id: Int) {
         node { id title { romaji english } type format status }
       }
     }
+    externalLinks { site url type }
   }
 }`
 

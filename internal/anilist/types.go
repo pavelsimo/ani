@@ -20,12 +20,13 @@ type Media struct {
 	NextAiringEpisode *AiringEpisode `json:"nextAiringEpisode"`
 
 	// Detail-only fields (populated by QueryMedia, zero/nil from list queries).
-	Description string         `json:"description,omitempty"`
-	Duration    *int           `json:"duration,omitempty"`
-	Source      string         `json:"source,omitempty"`
-	Studios     []Studio       `json:"studios,omitempty"`
-	Tags        []Tag          `json:"tags,omitempty"`
-	Relations   []RelationEdge `json:"relations,omitempty"`
+	Description   string         `json:"description,omitempty"`
+	Duration      *int           `json:"duration,omitempty"`
+	Source        string         `json:"source,omitempty"`
+	Studios       []Studio       `json:"studios,omitempty"`
+	Tags          []Tag          `json:"tags,omitempty"`
+	Relations     []RelationEdge `json:"relations,omitempty"`
+	ExternalLinks []ExternalLink `json:"externalLinks,omitempty"`
 }
 
 // Studio represents an anime production studio.
@@ -68,6 +69,13 @@ type FuzzyDate struct {
 	Year  *int `json:"year"`
 	Month *int `json:"month"`
 	Day   *int `json:"day"`
+}
+
+// ExternalLink is a URL associated with a media entry (streaming, info, social).
+type ExternalLink struct {
+	Site string `json:"site"`
+	URL  string `json:"url"`
+	Type string `json:"type"`
 }
 
 // AiringEpisode holds next-airing information.

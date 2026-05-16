@@ -27,7 +27,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("quiet", "q", false, "suppress non-essential output")
 	rootCmd.PersistentFlags().Bool("json", false, "output as JSON")
 	rootCmd.PersistentFlags().Bool("no-color", false, "disable color output")
-	rootCmd.PersistentFlags().String("lang", "romaji", "title language: romaji or english")
+	rootCmd.PersistentFlags().String("lang", "english", "title language: romaji, english, or native")
 
 	// Respect NO_COLOR env variable.
 	if os.Getenv("NO_COLOR") != "" {

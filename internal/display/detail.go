@@ -18,26 +18,44 @@ var (
 	detailHdrStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#58a6ff"))
 )
 
+// DetailOptions controls how RenderDetailWithOptions renders a media entry.
+type DetailOptions struct {
+	Width     int  // synopsis wrap width; 0 uses 80
+	NoColor   bool
+	SkipTitle bool // omit title block (e.g. TUI renders it separately)
+}
+
 // RenderDetail formats a fully-loaded Media entry as a human-readable string.
-// Set noColor to true for plain text output suitable for piping or agents.
 func RenderDetail(media anilist.Media, lang string, noColor bool) string {
+	return RenderDetailWithOptions(media, lang, DetailOptions{Width: 80, NoColor: noColor})
+}
+
+// RenderDetailWithOptions is the shared renderer used by both the CLI and TUI.
+func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOptions) string {
+	wrapWidth := opts.Width
+	if wrapWidth <= 0 {
+		wrapWidth = 80
+	}
+
 	var sb strings.Builder
 
-	// Title block
-	primary := TitleFromTitle(media.Title, lang)
-	if noColor {
-		sb.WriteString(primary + "\n")
-	} else {
-		sb.WriteString(detailTitleStyle.Render(primary) + "\n")
-	}
-	if media.Title.Native != "" && media.Title.Native != primary {
-		if noColor {
-			sb.WriteString(media.Title.Native + "\n")
+	// Title block (skipped by TUI which renders it as a fixed header)
+	if !opts.SkipTitle {
+		primary := TitleFromTitle(media.Title, lang)
+		if opts.NoColor {
+			sb.WriteString(primary + "\n")
 		} else {
-			sb.WriteString(detailNativeStyle.Render(media.Title.Native) + "\n")
+			sb.WriteString(detailTitleStyle.Render(primary) + "\n")
 		}
+		if media.Title.Native != "" && media.Title.Native != primary {
+			if opts.NoColor {
+				sb.WriteString(media.Title.Native + "\n")
+			} else {
+				sb.WriteString(detailNativeStyle.Render(media.Title.Native) + "\n")
+			}
+		}
+		sb.WriteString("\n")
 	}
-	sb.WriteString("\n")
 
 	// Info grid — single column, label padded to 11 chars
 	type kv struct{ label, value string }
@@ -56,7 +74,7 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 	}
 	for _, f := range fields {
 		label := fmt.Sprintf("%-11s", f.label+":")
-		if noColor {
+		if opts.NoColor {
 			sb.WriteString("  " + label + " " + f.value + "\n")
 		} else {
 			sb.WriteString("  " + detailLabelStyle.Render(label) + " " + detailValueStyle.Render(f.value) + "\n")
@@ -66,7 +84,7 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 
 	// Genres
 	if len(media.Genres) > 0 {
-		if noColor {
+		if opts.NoColor {
 			sb.WriteString("Genres:  " + strings.Join(media.Genres, ", ") + "\n")
 		} else {
 			sb.WriteString(detailHdrStyle.Render("Genres") + "\n")
@@ -86,7 +104,7 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 		for i, t := range tags {
 			names[i] = t.Name
 		}
-		if noColor {
+		if opts.NoColor {
 			sb.WriteString("Tags:    " + strings.Join(names, ", ") + "\n")
 		} else {
 			sb.WriteString(detailHdrStyle.Render("Tags") + "\n")
@@ -102,7 +120,7 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 	// Relations (ANIME only, meaningful types)
 	rels := AnimeRelations(media.Relations)
 	if len(rels) > 0 {
-		if noColor {
+		if opts.NoColor {
 			sb.WriteString("Relations:\n")
 		} else {
 			sb.WriteString(detailHdrStyle.Render("Relations") + "\n")
@@ -111,7 +129,7 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 			relType := FormatRelationType(r.RelationType)
 			title := TitleFromTitle(r.Node.Title, lang)
 			format := Format(r.Node.Format)
-			if noColor {
+			if opts.NoColor {
 				sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n", relType, title, format))
 			} else {
 				sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n",
@@ -123,15 +141,40 @@ func RenderDetail(media anilist.Media, lang string, noColor bool) string {
 		sb.WriteString("\n")
 	}
 
+	// Streaming links
+	var streamLinks []anilist.ExternalLink
+	for _, l := range media.ExternalLinks {
+		if l.Type == "STREAMING" {
+			streamLinks = append(streamLinks, l)
+		}
+	}
+	if len(streamLinks) > 0 {
+		if opts.NoColor {
+			sb.WriteString("Streaming:\n")
+		} else {
+			sb.WriteString(detailHdrStyle.Render("Streaming") + "\n")
+		}
+		for _, l := range streamLinks {
+			if opts.NoColor {
+				sb.WriteString(fmt.Sprintf("  %-14s %s\n", l.Site, l.URL))
+			} else {
+				sb.WriteString(fmt.Sprintf("  %-14s %s\n",
+					detailLabelStyle.Render(l.Site),
+					detailValueStyle.Hyperlink(l.URL).Render(l.URL)))
+			}
+		}
+		sb.WriteString("\n")
+	}
+
 	// Synopsis
 	if media.Description != "" {
-		if noColor {
+		if opts.NoColor {
 			sb.WriteString("Synopsis:\n")
 		} else {
 			sb.WriteString(detailHdrStyle.Render("Synopsis") + "\n")
 		}
 		synopsis := StripHTML(media.Description)
-		wrapped := WrapText(synopsis, 80)
+		wrapped := WrapText(synopsis, wrapWidth)
 		for _, line := range strings.Split(wrapped, "\n") {
 			sb.WriteString("  " + line + "\n")
 		}

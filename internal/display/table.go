@@ -49,7 +49,7 @@ func Render(media []anilist.Media, lang string, noColor bool) string {
 	if noColor {
 		return renderPlain(headers, rows)
 	}
-	return renderStyled(headers, rows)
+	return renderStyled(headers, rows) + "\n"
 }
 
 func renderStyled(headers []string, rows [][]string) string {
