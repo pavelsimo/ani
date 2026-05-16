@@ -273,7 +273,7 @@ function heroHtml() {
     <a class="btn-primary" href="install.html">Get started</a>
     <a class="btn-outline" href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
   </div>
-  <div class="code-wrap"><pre><code>brew install ${TOOL}</code></pre>
+  <div class="code-wrap" style="width:fit-content"><pre><code>brew install ${TOOL}</code></pre>
 <button class="copy-btn">Copy</button></div>
 </section>`;
 }
