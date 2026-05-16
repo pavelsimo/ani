@@ -25,24 +25,31 @@ var popularCmd = &cobra.Command{
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
 		lang, _ := cmd.Flags().GetString("lang")
+		mediaType, _ := cmd.Flags().GetString("type")
 
-		if season == "" || year == 0 {
-			s, y := anilist.CurrentSeason()
-			if season == "" {
-				season = s
+		vars := map[string]any{
+			"type":     strings.ToUpper(mediaType),
+			keyPage:    page,
+			keyPerPage: perPage,
+		}
+
+		// Season filtering only applies to anime.
+		if strings.ToUpper(mediaType) != "MANGA" {
+			if season == "" || year == 0 {
+				s, y := anilist.CurrentSeason()
+				if season == "" {
+					season = s
+				}
+				if year == 0 {
+					year = y
+				}
 			}
-			if year == 0 {
-				year = y
-			}
+			vars["season"] = strings.ToUpper(season)
+			vars["seasonYear"] = year
 		}
 
 		client := anilist.New()
-		result, err := client.Query(context.Background(), anilist.QueryPopularSeason, map[string]any{
-			"season":     strings.ToUpper(season),
-			"seasonYear": year,
-			keyPage:      page,
-			keyPerPage:   perPage,
-		})
+		result, err := client.Query(context.Background(), anilist.QueryPopularSeason, vars)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
 			return err
@@ -51,7 +58,7 @@ var popularCmd = &cobra.Command{
 		if asJSON {
 			return json.NewEncoder(os.Stdout).Encode(result.Media)
 		}
-		fmt.Print(display.Render(result.Media, lang, noColor))
+		fmt.Print(display.Render(result.Media, lang, noColor, mediaType))
 		return nil
 	},
 }

@@ -39,7 +39,11 @@ var infoCmd = &cobra.Command{
 		if asJSON {
 			return json.NewEncoder(os.Stdout).Encode(media)
 		}
-		fmt.Print(display.RenderDetail(*media, lang, noColor))
+		fmt.Print(display.RenderDetailWithOptions(*media, lang, display.DetailOptions{
+			Width:     80,
+			NoColor:   noColor,
+			MediaType: media.Type,
+		}))
 		return nil
 	},
 }

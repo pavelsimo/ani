@@ -1,9 +1,10 @@
 package anilist
 
-// Media represents a single anime entry from AniList.
+// Media represents a single anime or manga entry from AniList.
 type Media struct {
-	ID    int   `json:"id"`
-	Title Title `json:"title"`
+	ID    int    `json:"id"`
+	Type  string `json:"type"` // "ANIME" or "MANGA"
+	Title Title  `json:"title"`
 
 	Genres       []string `json:"genres"`
 	AverageScore int      `json:"averageScore"`
@@ -11,6 +12,8 @@ type Media struct {
 
 	Format   string `json:"format"`
 	Episodes *int   `json:"episodes"`
+	Chapters *int   `json:"chapters"`
+	Volumes  *int   `json:"volumes"`
 	Status   string `json:"status"`
 
 	Season     string    `json:"season"`

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -22,9 +23,11 @@ var upcomingCmd = &cobra.Command{
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
 		lang, _ := cmd.Flags().GetString("lang")
+		mediaType, _ := cmd.Flags().GetString("type")
 
 		client := anilist.New()
 		result, err := client.Query(context.Background(), anilist.QueryUpcoming, map[string]any{
+			"type":     strings.ToUpper(mediaType),
 			keyPage:    page,
 			keyPerPage: perPage,
 		})
@@ -36,7 +39,7 @@ var upcomingCmd = &cobra.Command{
 		if asJSON {
 			return json.NewEncoder(os.Stdout).Encode(result.Media)
 		}
-		fmt.Print(display.Render(result.Media, lang, noColor))
+		fmt.Print(display.Render(result.Media, lang, noColor, mediaType))
 		return nil
 	},
 }

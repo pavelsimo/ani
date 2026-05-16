@@ -20,9 +20,10 @@ var (
 
 // DetailOptions controls how RenderDetailWithOptions renders a media entry.
 type DetailOptions struct {
-	Width     int  // synopsis wrap width; 0 uses 80
+	Width     int    // synopsis wrap width; 0 uses 80
 	NoColor   bool
-	SkipTitle bool // omit title block (e.g. TUI renders it separately)
+	SkipTitle bool   // omit title block (e.g. TUI renders it separately)
+	MediaType string // "ANIME" or "MANGA"; defaults to ANIME
 }
 
 // RenderDetail formats a fully-loaded Media entry as a human-readable string.
@@ -59,18 +60,31 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 
 	// Info grid — single column, label padded to 11 chars
 	type kv struct{ label, value string }
-	fields := []kv{
-		{"Format", Format(media.Format)},
-		{"Episodes", Episodes(media.Episodes)},
-		{"Status", Status(media.Status)},
-		{"Score", Score(media.AverageScore)},
-		{"Season", Season(media.Season, media.SeasonYear)},
-		{"Users", Popularity(media.Popularity)},
-		{"Studio", Studios(media.Studios)},
-		{"Source", Source(media.Source)},
-	}
-	if media.Duration != nil && *media.Duration > 0 {
-		fields = append(fields, kv{"Duration", Duration(media.Duration)})
+	var fields []kv
+	if strings.ToUpper(opts.MediaType) == "MANGA" {
+		fields = []kv{
+			{"Format", Format(media.Format)},
+			{"Chapters", Chapters(media.Chapters)},
+			{"Volumes", Volumes(media.Volumes)},
+			{"Status", Status(media.Status)},
+			{"Score", Score(media.AverageScore)},
+			{"Users", Popularity(media.Popularity)},
+			{"Source", Source(media.Source)},
+		}
+	} else {
+		fields = []kv{
+			{"Format", Format(media.Format)},
+			{"Episodes", Episodes(media.Episodes)},
+			{"Status", Status(media.Status)},
+			{"Score", Score(media.AverageScore)},
+			{"Season", Season(media.Season, media.SeasonYear)},
+			{"Users", Popularity(media.Popularity)},
+			{"Studio", Studios(media.Studios)},
+			{"Source", Source(media.Source)},
+		}
+		if media.Duration != nil && *media.Duration > 0 {
+			fields = append(fields, kv{"Duration", Duration(media.Duration)})
+		}
 	}
 	for _, f := range fields {
 		label := fmt.Sprintf("%-11s", f.label+":")

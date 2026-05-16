@@ -25,24 +25,42 @@ var (
 )
 
 // Render produces a lipgloss table string from a slice of media entries.
-func Render(media []anilist.Media, lang string, noColor bool) string {
+// mediaType should be "ANIME" or "MANGA" and controls which columns are shown.
+func Render(media []anilist.Media, lang string, noColor bool, mediaType string) string {
 	if len(media) == 0 {
 		return "  no results found\n"
 	}
 
-	headers := []string{"Title", "Genres", "Score", "Users", "Format", "Eps", "Status", "Next Ep"}
-
+	var headers []string
 	rows := make([][]string, len(media))
-	for i, m := range media {
-		rows[i] = []string{
-			Truncate(Title(m, lang), 40),
-			truncateGenres(m.Genres, 3),
-			Score(m.AverageScore),
-			Popularity(m.Popularity),
-			Format(m.Format),
-			Episodes(m.Episodes),
-			Status(m.Status),
-			NextEp(m.NextAiringEpisode),
+
+	if strings.ToUpper(mediaType) == "MANGA" {
+		headers = []string{"Title", "Genres", "Score", "Users", "Format", "Chs", "Vols", "Status"}
+		for i, m := range media {
+			rows[i] = []string{
+				Truncate(Title(m, lang), 40),
+				truncateGenres(m.Genres, 3),
+				Score(m.AverageScore),
+				Popularity(m.Popularity),
+				Format(m.Format),
+				Chapters(m.Chapters),
+				Volumes(m.Volumes),
+				Status(m.Status),
+			}
+		}
+	} else {
+		headers = []string{"Title", "Genres", "Score", "Users", "Format", "Eps", "Status", "Next Ep"}
+		for i, m := range media {
+			rows[i] = []string{
+				Truncate(Title(m, lang), 40),
+				truncateGenres(m.Genres, 3),
+				Score(m.AverageScore),
+				Popularity(m.Popularity),
+				Format(m.Format),
+				Episodes(m.Episodes),
+				Status(m.Status),
+				NextEp(m.NextAiringEpisode),
+			}
 		}
 	}
 

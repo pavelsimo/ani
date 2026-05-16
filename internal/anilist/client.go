@@ -46,10 +46,13 @@ type pageData struct {
 
 type mediaDetailRaw struct {
 	ID                int            `json:"id"`
+	Type              string         `json:"type"`
 	Title             Title          `json:"title"`
 	Description       string         `json:"description"`
 	Format            string         `json:"format"`
 	Episodes          *int           `json:"episodes"`
+	Chapters          *int           `json:"chapters"`
+	Volumes           *int           `json:"volumes"`
 	Status            string         `json:"status"`
 	Season            string         `json:"season"`
 	SeasonYear        int            `json:"seasonYear"`
@@ -164,10 +167,13 @@ func (c *Client) QueryMedia(ctx context.Context, id int) (*Media, error) {
 	raw := data.Media
 	media := &Media{
 		ID:                raw.ID,
+		Type:              raw.Type,
 		Title:             raw.Title,
 		Description:       raw.Description,
 		Format:            raw.Format,
 		Episodes:          raw.Episodes,
+		Chapters:          raw.Chapters,
+		Volumes:           raw.Volumes,
 		Status:            raw.Status,
 		Season:            raw.Season,
 		SeasonYear:        raw.SeasonYear,

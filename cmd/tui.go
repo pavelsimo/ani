@@ -10,6 +10,7 @@ import (
 func init() {
 	rootCmd.RunE = func(cmd *cobra.Command, args []string) error {
 		lang, _ := cmd.Flags().GetString("lang")
-		return tui.Start(anilist.New(), lang)
+		mediaType, _ := cmd.Flags().GetString("type")
+		return tui.Start(anilist.New(), lang, mediaType)
 	}
 }

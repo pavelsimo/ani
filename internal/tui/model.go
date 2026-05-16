@@ -32,9 +32,11 @@ var tabNames = [tabCount]string{
 
 // loadedMsg carries freshly fetched media for a tab.
 type loadedMsg struct {
-	tab   int
-	media []anilist.Media
-	err   error
+	tab      int
+	media    []anilist.Media
+	pageInfo anilist.PageInfo
+	err      error
+	append   bool
 }
 
 // detailLoadedMsg carries the result of a detail fetch.
@@ -47,6 +49,7 @@ type detailLoadedMsg struct {
 type Model struct {
 	client    *anilist.Client
 	lang      string
+	mediaType string
 	width     int
 	height    int
 	activeTab int
@@ -55,6 +58,11 @@ type Model struct {
 	loading [tabCount]bool
 	err     [tabCount]error
 	cursor  [tabCount]int
+
+	page        [tabCount]int
+	hasNextPage [tabCount]bool
+	loadingMore [tabCount]bool
+	searchQuery string
 
 	searchMode  bool
 	searchInput textinput.Model
@@ -68,7 +76,7 @@ type Model struct {
 }
 
 // New creates a new TUI model.
-func New(client *anilist.Client, lang string) Model {
+func New(client *anilist.Client, lang string, mediaType string) Model {
 	ti := textinput.New()
 	ti.Placeholder = "search anime…"
 	ti.CharLimit = 120
@@ -79,6 +87,7 @@ func New(client *anilist.Client, lang string) Model {
 	m := Model{
 		client:      client,
 		lang:        lang,
+		mediaType:   strings.ToUpper(mediaType),
 		searchInput: ti,
 		spinner:     sp,
 	}
@@ -104,7 +113,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.detailMode && m.detailMedia != nil {
 			m.vp.Width = m.detailVPWidth()
 			m.vp.Height = m.detailVPHeight()
-			m.vp.SetContent(display.RenderDetailWithOptions(*m.detailMedia, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true}))
+			m.vp.SetContent(display.RenderDetailWithOptions(*m.detailMedia, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true, MediaType: m.mediaType}))
 		}
 
 	case spinner.TickMsg:
@@ -113,9 +122,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 
 	case loadedMsg:
-		m.loading[msg.tab] = false
-		m.media[msg.tab] = msg.media
-		m.err[msg.tab] = msg.err
+		if msg.err != nil {
+			m.loading[msg.tab] = false
+			m.loadingMore[msg.tab] = false
+			m.err[msg.tab] = msg.err
+			break
+		}
+		if msg.append {
+			m.loadingMore[msg.tab] = false
+			m.media[msg.tab] = append(m.media[msg.tab], msg.media...)
+		} else {
+			m.loading[msg.tab] = false
+			m.media[msg.tab] = msg.media
+		}
+		m.hasNextPage[msg.tab] = msg.pageInfo.HasNextPage
+		m.page[msg.tab] = msg.pageInfo.CurrentPage
+		m.err[msg.tab] = nil
 
 	case detailLoadedMsg:
 		m.detailLoading = false
@@ -124,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.detailMedia = &msg.media
 			m.vp = viewport.New(m.detailVPWidth(), m.detailVPHeight())
-			m.vp.SetContent(display.RenderDetailWithOptions(msg.media, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true}))
+			m.vp.SetContent(display.RenderDetailWithOptions(msg.media, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true, MediaType: m.mediaType}))
 		}
 
 	case tea.KeyMsg:
@@ -175,10 +197,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.searchInput.SetValue("")
 			m.searchInput.Focus()
 
+		case key.Matches(msg, keys.NextPage):
+			tab := m.activeTab
+			if m.hasNextPage[tab] && !m.loading[tab] && !m.loadingMore[tab] {
+				m.loadingMore[tab] = true
+				cmds = append(cmds, m.fetchNextPage(tab))
+			}
+
 		case key.Matches(msg, keys.Refresh):
-			m.media[m.activeTab] = nil
-			m.err[m.activeTab] = nil
-			cmds = append(cmds, m.fetchTab(m.activeTab))
+			tab := m.activeTab
+			m.media[tab] = nil
+			m.err[tab] = nil
+			m.page[tab] = 0
+			m.hasNextPage[tab] = false
+			m.loadingMore[tab] = false
+			cmds = append(cmds, m.fetchTab(tab))
 		}
 	}
 
@@ -302,9 +335,14 @@ func (m Model) viewList(tab, height int) string {
 	media := m.media[tab]
 	cursor := m.cursor[tab]
 
+	extraRow := 0
+	if m.loadingMore[tab] {
+		extraRow = 1
+	}
+
 	// simple scrolling window
 	start := max(0, cursor-height/2)
-	end := min(len(media), start+height)
+	end := min(len(media), start+height-extraRow)
 
 	var sb strings.Builder
 	for i := start; i < end; i++ {
@@ -316,6 +354,10 @@ func (m Model) viewList(tab, height int) string {
 		}
 		sb.WriteString("\n")
 	}
+	if m.loadingMore[tab] {
+		sb.WriteString(loading.Render(m.spinner.View() + " loading more…"))
+		sb.WriteString("\n")
+	}
 	return sb.String()
 }
 
@@ -325,7 +367,6 @@ func (m Model) renderItem(media anilist.Media) string {
 	users := display.Popularity(media.Popularity)
 	format := display.Format(media.Format)
 	status := display.Status(media.Status)
-	nextEp := display.NextEp(media.NextAiringEpisode)
 
 	genres := ""
 	if len(media.Genres) > 0 {
@@ -338,21 +379,33 @@ func (m Model) renderItem(media anilist.Media) string {
 		genres = "[" + strings.Join(genreList, "][") + "]"
 	}
 
-	right := fmt.Sprintf("  %s   %s users   %s   %s eps   %s   %s",
-		score, users, format,
-		display.Episodes(media.Episodes), status, nextEp)
+	var right string
+	if m.mediaType == "MANGA" {
+		right = fmt.Sprintf("  %s   %s users   %s   %s   %s   %s",
+			score, users, format,
+			display.Chapters(media.Chapters), display.Volumes(media.Volumes), status)
+	} else {
+		right = fmt.Sprintf("  %s   %s users   %s   %s eps   %s   %s",
+			score, users, format,
+			display.Episodes(media.Episodes), status, display.NextEp(media.NextAiringEpisode))
+	}
 
 	return fmt.Sprintf("%-44s %-30s %s", title, genres, right)
 }
 
 func (m Model) viewStatusBar() string {
+	nextHint := ""
+	if m.hasNextPage[m.activeTab] {
+		nextHint = "  " + statusKey.Render("]") + " next page"
+	}
 	hint := statusBar.Render(
 		statusKey.Render("↑↓") + " navigate  " +
 			statusKey.Render("enter") + " detail  " +
 			statusKey.Render("/") + " search  " +
 			statusKey.Render("tab") + " switch  " +
 			statusKey.Render("r") + " refresh  " +
-			statusKey.Render("q") + " quit",
+			statusKey.Render("q") + " quit" +
+			nextHint,
 	)
 	return hint
 }
@@ -366,10 +419,15 @@ func (m Model) ensureLoaded(tab int) tea.Cmd {
 
 func (m *Model) fetchTab(tab int) tea.Cmd {
 	m.loading[tab] = true
+	return m.fetchTabPage(tab, 1, false)
+}
+
+func (m *Model) fetchTabPage(tab, pageNum int, appendResults bool) tea.Cmd {
 	client := m.client
+	mediaType := m.mediaType
 	return func() tea.Msg {
 		ctx := context.Background()
-		vars := map[string]any{"page": 1, "perPage": 25}
+		vars := map[string]any{"type": mediaType, "page": pageNum, "perPage": 25}
 
 		var (
 			page *anilist.Page
@@ -380,9 +438,11 @@ func (m *Model) fetchTab(tab int) tea.Cmd {
 		case tabTrending:
 			page, err = client.Query(ctx, anilist.QueryTrending, vars)
 		case tabPopular:
-			season, year := anilist.CurrentSeason()
-			vars["season"] = season
-			vars["seasonYear"] = year
+			if mediaType != "MANGA" {
+				season, year := anilist.CurrentSeason()
+				vars["season"] = season
+				vars["seasonYear"] = year
+			}
 			page, err = client.Query(ctx, anilist.QueryPopularSeason, vars)
 		case tabUpcoming:
 			page, err = client.Query(ctx, anilist.QueryUpcoming, vars)
@@ -393,32 +453,46 @@ func (m *Model) fetchTab(tab int) tea.Cmd {
 		}
 
 		if err != nil {
-			return loadedMsg{tab: tab, err: err}
+			return loadedMsg{tab: tab, err: err, append: appendResults}
 		}
 		if page == nil {
-			return loadedMsg{tab: tab, media: nil}
+			return loadedMsg{tab: tab, append: appendResults}
 		}
-		return loadedMsg{tab: tab, media: page.Media}
+		return loadedMsg{tab: tab, media: page.Media, pageInfo: page.PageInfo, append: appendResults}
 	}
 }
 
+func (m *Model) fetchNextPage(tab int) tea.Cmd {
+	if tab == tabSearch {
+		return m.fetchSearchPage(m.searchQuery, m.page[tab]+1, true)
+	}
+	return m.fetchTabPage(tab, m.page[tab]+1, true)
+}
+
 func (m *Model) fetchSearch(query string) tea.Cmd {
+	m.searchQuery = query
+	return m.fetchSearchPage(query, 1, false)
+}
+
+func (m *Model) fetchSearchPage(query string, pageNum int, appendResults bool) tea.Cmd {
 	client := m.client
+	mediaType := m.mediaType
 	return func() tea.Msg {
 		ctx := context.Background()
 		vars := map[string]any{
+			"type":    mediaType,
 			"search":  query,
-			"page":    1,
+			"page":    pageNum,
 			"perPage": 25,
 		}
 		page, err := client.Query(ctx, anilist.QuerySearch, vars)
 		if err != nil {
-			return loadedMsg{tab: tabSearch, err: err}
+			return loadedMsg{tab: tabSearch, err: err, append: appendResults}
 		}
 		if page == nil {
-			return loadedMsg{tab: tabSearch, media: nil}
+			return loadedMsg{tab: tabSearch, append: appendResults}
 		}
-		return loadedMsg{tab: tabSearch, media: page.Media}
+		return loadedMsg{tab: tabSearch, media: page.Media, pageInfo: page.PageInfo, append: appendResults}
 	}
 }
 
@@ -477,8 +551,8 @@ func (m Model) viewDetail() string {
 }
 
 // Start launches the TUI.
-func Start(client *anilist.Client, lang string) error {
-	m := New(client, lang)
+func Start(client *anilist.Client, lang string, mediaType string) error {
+	m := New(client, lang, mediaType)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	_, err := p.Run()
 	return err

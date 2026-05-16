@@ -28,6 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("json", false, "output as JSON")
 	rootCmd.PersistentFlags().Bool("no-color", false, "disable color output")
 	rootCmd.PersistentFlags().String("lang", "english", "title language: romaji, english, or native")
+	rootCmd.PersistentFlags().String("type", "anime", "media type: anime or manga")
 
 	// Respect NO_COLOR env variable.
 	if os.Getenv("NO_COLOR") != "" {

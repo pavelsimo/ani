@@ -73,6 +73,12 @@ func Format(f string) string {
 		return "Special"
 	case "MUSIC":
 		return "Music"
+	case "MANGA":
+		return "Manga"
+	case "NOVEL":
+		return "Novel"
+	case "ONE_SHOT":
+		return "One Shot"
 	default:
 		return f
 	}
@@ -102,6 +108,22 @@ func Episodes(eps *int) string {
 		return "—"
 	}
 	return fmt.Sprintf("%d eps", *eps)
+}
+
+// Chapters formats the chapter count.
+func Chapters(n *int) string {
+	if n == nil || *n == 0 {
+		return "—"
+	}
+	return fmt.Sprintf("%d chs", *n)
+}
+
+// Volumes formats the volume count.
+func Volumes(n *int) string {
+	if n == nil || *n == 0 {
+		return "—"
+	}
+	return fmt.Sprintf("%d vols", *n)
 }
 
 // NextEp formats the next airing episode information.

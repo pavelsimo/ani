@@ -3,12 +3,15 @@ package anilist
 // mediaFragment holds all fields requested on every media query.
 const mediaFragment = `
 	id
+	type
 	title { romaji english native }
 	genres
 	averageScore
 	popularity
 	format
 	episodes
+	chapters
+	volumes
 	status
 	season
 	seasonYear
@@ -16,59 +19,62 @@ const mediaFragment = `
 	nextAiringEpisode { episode timeUntilAiring }
 `
 
-// QueryTrending fetches currently trending anime.
+// QueryTrending fetches currently trending anime or manga.
 const QueryTrending = `
-query ($page: Int, $perPage: Int) {
+query ($type: MediaType, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
-    media(type: ANIME, sort: TRENDING_DESC) {` + mediaFragment + `}
+    media(type: $type, sort: TRENDING_DESC) {` + mediaFragment + `}
   }
 }`
 
-// QueryPopularSeason fetches the most popular anime of a given season.
+// QueryPopularSeason fetches the most popular media of a given season.
+// season is nullable so it works for manga (which has no seasons).
 const QueryPopularSeason = `
-query ($season: MediaSeason!, $seasonYear: Int!, $page: Int, $perPage: Int) {
+query ($type: MediaType, $season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
-    media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: POPULARITY_DESC) {` + mediaFragment + `}
+    media(type: $type, season: $season, seasonYear: $seasonYear, sort: POPULARITY_DESC) {` + mediaFragment + `}
   }
 }`
 
-// QueryUpcoming fetches anime that have not yet started airing.
+// QueryUpcoming fetches media that have not yet started airing/publishing.
 const QueryUpcoming = `
-query ($page: Int, $perPage: Int) {
+query ($type: MediaType, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
-    media(type: ANIME, status: NOT_YET_RELEASED, sort: START_DATE) {` + mediaFragment + `}
+    media(type: $type, status: NOT_YET_RELEASED, sort: START_DATE) {` + mediaFragment + `}
   }
 }`
 
-// QueryAllTime fetches the most popular anime of all time.
+// QueryAllTime fetches the most popular media of all time.
 const QueryAllTime = `
-query ($page: Int, $perPage: Int) {
+query ($type: MediaType, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
-    media(type: ANIME, sort: POPULARITY_DESC) {` + mediaFragment + `}
+    media(type: $type, sort: POPULARITY_DESC) {` + mediaFragment + `}
   }
 }`
 
-// QueryTop fetches the highest-scored anime.
+// QueryTop fetches the highest-scored media.
 const QueryTop = `
-query ($page: Int, $perPage: Int) {
+query ($type: MediaType, $page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
-    media(type: ANIME, sort: SCORE_DESC) {` + mediaFragment + `}
+    media(type: $type, sort: SCORE_DESC) {` + mediaFragment + `}
   }
 }`
 
-// QueryDetail fetches full detail for a single anime by ID.
+// QueryDetail fetches full detail for a single media entry by ID.
+// No type filter — IDs are globally unique across ANIME and MANGA.
 const QueryDetail = `
 query ($id: Int) {
-  Media(id: $id, type: ANIME) {
+  Media(id: $id) {
     id
+    type
     title { romaji english native }
     description(asHtml: false)
-    format episodes status season seasonYear
+    format episodes chapters volumes status season seasonYear
     startDate { year month day }
     averageScore popularity duration source
     genres
@@ -85,9 +91,10 @@ query ($id: Int) {
   }
 }`
 
-// QuerySearch fetches anime matching the given filters.
+// QuerySearch fetches media matching the given filters.
 const QuerySearch = `
 query (
+  $type: MediaType
   $search: String
   $genres: [String]
   $seasonYear: Int
@@ -101,7 +108,7 @@ query (
   Page(page: $page, perPage: $perPage) {
     pageInfo { total currentPage lastPage hasNextPage }
     media(
-      type: ANIME
+      type: $type
       search: $search
       genre_in: $genres
       seasonYear: $seasonYear
