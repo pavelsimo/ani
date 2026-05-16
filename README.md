@@ -1,6 +1,6 @@
 # 🦊 ani
 
-Browse and search AniList anime from your terminal.
+Browse and search [AniList](https://anilist.co) anime from your terminal.
 
 [![release](https://img.shields.io/github/v/release/pavelsimo/ani?style=flat-square&color=4d9e4d&logoColor=white)](https://github.com/pavelsimo/ani/releases)
 [![license MIT](https://img.shields.io/badge/license-MIT-ffd60a?style=flat-square&logoColor=white)](LICENSE)
