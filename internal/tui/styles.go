@@ -47,6 +47,11 @@ var (
 			Foreground(lipgloss.Color("#58a6ff")).
 			Bold(true)
 
+	searchResultsStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#7d8590")).
+				Italic(true).
+				Padding(0, 2)
+
 	// Loading / error
 	loading = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#7d8590")).

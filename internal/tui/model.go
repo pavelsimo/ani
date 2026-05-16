@@ -164,11 +164,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case key.Matches(msg, keys.NextTab):
-			m.activeTab = (m.activeTab + 1) % tabCount
+			next := (m.activeTab + 1) % tabCount
+			if next == tabSearch {
+				next = tabTrending
+			}
+			m.activeTab = next
 			cmds = append(cmds, m.ensureLoaded(m.activeTab))
 
 		case key.Matches(msg, keys.PrevTab):
-			m.activeTab = (m.activeTab - 1 + tabCount) % tabCount
+			prev := (m.activeTab - 1 + tabCount) % tabCount
+			if prev == tabSearch {
+				prev = tabTop
+			}
+			m.activeTab = prev
 			cmds = append(cmds, m.ensureLoaded(m.activeTab))
 
 		case key.Matches(msg, keys.Down):
@@ -211,7 +219,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.page[tab] = 0
 			m.hasNextPage[tab] = false
 			m.loadingMore[tab] = false
-			cmds = append(cmds, m.fetchTab(tab))
+			if tab == tabSearch && m.searchQuery != "" {
+				m.loading[tab] = true
+				cmds = append(cmds, m.fetchSearch(m.searchQuery))
+			} else {
+				cmds = append(cmds, m.fetchTab(tab))
+			}
 		}
 	}
 
@@ -297,12 +310,12 @@ func (m Model) View() string {
 }
 
 func (m Model) viewTabBar() string {
-	tabs := make([]string, tabCount)
-	for i, name := range tabNames {
+	tabs := make([]string, tabSearch)
+	for i := 0; i < tabSearch; i++ {
 		if i == m.activeTab {
-			tabs[i] = tabActive.Render(name)
+			tabs[i] = tabActive.Render(tabNames[i])
 		} else {
-			tabs[i] = tabInactive.Render(name)
+			tabs[i] = tabInactive.Render(tabNames[i])
 		}
 	}
 	bar := lipgloss.JoinHorizontal(lipgloss.Top, tabs...)
@@ -318,17 +331,24 @@ func (m Model) viewContent() string {
 	}
 
 	tab := m.activeTab
-	if m.loading[tab] || (m.media[tab] == nil && m.err[tab] == nil) {
-		return loading.Render(m.spinner.View() + " loading…")
-	}
-	if m.err[tab] != nil {
-		return errorStyle.Render("error: " + m.err[tab].Error())
-	}
-	if len(m.media[tab]) == 0 {
-		return loading.Render("no results")
+
+	searchHeader := ""
+	if tab == tabSearch && m.searchQuery != "" {
+		searchHeader = searchResultsStyle.Render("Results for: "+m.searchQuery) + "\n"
+		contentHeight--
 	}
 
-	return m.viewList(tab, contentHeight)
+	if m.loading[tab] || (m.media[tab] == nil && m.err[tab] == nil) {
+		return searchHeader + loading.Render(m.spinner.View()+" loading…")
+	}
+	if m.err[tab] != nil {
+		return searchHeader + errorStyle.Render("error: "+m.err[tab].Error())
+	}
+	if len(m.media[tab]) == 0 {
+		return searchHeader + loading.Render("no results")
+	}
+
+	return searchHeader + m.viewList(tab, contentHeight)
 }
 
 func (m Model) viewList(tab, height int) string {
