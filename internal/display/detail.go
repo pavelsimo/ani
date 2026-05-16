@@ -246,19 +246,19 @@ func TopNonSpoilerTags(tags []anilist.Tag, n int) []anilist.Tag {
 }
 
 var allowedRelationTypes = map[string]bool{
-	"PREQUEL":     true,
-	"SEQUEL":      true,
-	"SIDE_STORY":  true,
-	"ALTERNATIVE": true,
-	"PARENT":      true,
-	"SPIN_OFF":    true,
+	relTypePrequel:     true,
+	relTypeSequel:      true,
+	relTypeSideStory:   true,
+	relTypeAlternative: true,
+	relTypeParent:      true,
+	relTypeSpinOff:     true,
 }
 
 // AnimeRelations filters relation edges to ANIME-type nodes with meaningful relation types.
 func AnimeRelations(edges []anilist.RelationEdge) []anilist.RelationEdge {
 	result := make([]anilist.RelationEdge, 0, len(edges))
 	for _, e := range edges {
-		if e.Node.Type == "ANIME" && allowedRelationTypes[e.RelationType] {
+		if e.Node.Type == mediaTypeAnime && allowedRelationTypes[e.RelationType] {
 			result = append(result, e)
 		}
 	}
@@ -268,17 +268,17 @@ func AnimeRelations(edges []anilist.RelationEdge) []anilist.RelationEdge {
 // FormatRelationType converts an AniList relation type enum to a display string.
 func FormatRelationType(t string) string {
 	switch t {
-	case "PREQUEL":
+	case relTypePrequel:
 		return "Prequel"
-	case "SEQUEL":
+	case relTypeSequel:
 		return "Sequel"
-	case "SIDE_STORY":
+	case relTypeSideStory:
 		return "Side Story"
-	case "ALTERNATIVE":
+	case relTypeAlternative:
 		return "Alternative"
-	case "PARENT":
+	case relTypeParent:
 		return "Parent"
-	case "SPIN_OFF":
+	case relTypeSpinOff:
 		return "Spin-off"
 	default:
 		return t

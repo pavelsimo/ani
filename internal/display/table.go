@@ -47,7 +47,7 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 		for i, m := range media {
 			rows[i] = []string{
 				Truncate(Title(m, lang), 40),
-				truncateGenres(m.Genres, 3),
+				truncateGenres(m.Genres),
 				Score(m.AverageScore),
 				Popularity(m.Popularity),
 				Format(m.Format),
@@ -61,7 +61,7 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 		for i, m := range media {
 			rows[i] = []string{
 				Truncate(Title(m, lang), 40),
-				truncateGenres(m.Genres, 3),
+				truncateGenres(m.Genres),
 				Score(m.AverageScore),
 				Popularity(m.Popularity),
 				Format(m.Format),
@@ -131,9 +131,11 @@ func renderPlain(headers []string, rows [][]string) string {
 	return strings.TrimRight(sb.String(), "\n")
 }
 
-func truncateGenres(genres []string, max int) string {
-	if len(genres) > max {
-		genres = genres[:max]
+const maxGenres = 3
+
+func truncateGenres(genres []string) string {
+	if len(genres) > maxGenres {
+		genres = genres[:maxGenres]
 	}
 	return strings.Join(genres, ", ")
 }

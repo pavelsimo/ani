@@ -26,6 +26,11 @@ func New() *Client {
 	}
 }
 
+// NewWithClient returns a Client using the provided http.Client. For testing only.
+func NewWithClient(hc *http.Client) *Client {
+	return &Client{http: hc, baseURL: endpoint}
+}
+
 type gqlRequest struct {
 	Query     string         `json:"query"`
 	Variables map[string]any `json:"variables,omitempty"`

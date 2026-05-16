@@ -60,25 +60,25 @@ func Popularity(n int) string {
 // Format converts an AniList format enum to a display string.
 func Format(f string) string {
 	switch f {
-	case "TV":
+	case mediaFormatTV:
 		return "TV Show"
-	case "TV_SHORT":
+	case mediaFormatTVShort:
 		return "TV Short"
-	case "ONA":
-		return "ONA"
-	case "OVA":
-		return "OVA"
-	case "MOVIE":
+	case mediaFormatONA:
+		return mediaFormatONA
+	case mediaFormatOVA:
+		return mediaFormatOVA
+	case mediaFormatMovie:
 		return "Movie"
-	case "SPECIAL":
+	case mediaFormatSpecial:
 		return "Special"
-	case "MUSIC":
+	case mediaFormatMusic:
 		return "Music"
-	case "MANGA":
-		return "Manga"
-	case "NOVEL":
-		return "Novel"
-	case "ONE_SHOT":
+	case mediaFormatManga:
+		return displayManga
+	case mediaFormatNovel:
+		return displayNovel
+	case mediaFormatOneShot:
 		return "One Shot"
 	default:
 		return f
@@ -88,15 +88,15 @@ func Format(f string) string {
 // Status converts an AniList status enum to a display string.
 func Status(s string) string {
 	switch s {
-	case "RELEASING":
+	case mediaStatusReleasing:
 		return "Airing"
-	case "FINISHED":
+	case mediaStatusFinished:
 		return "Finished"
-	case "NOT_YET_RELEASED":
+	case mediaStatusNotYetReleased:
 		return "Upcoming"
-	case "CANCELLED":
+	case mediaStatusCancelled:
 		return "Cancelled"
-	case "HIATUS":
+	case mediaStatusHiatus:
 		return "Hiatus"
 	default:
 		return s
@@ -199,23 +199,23 @@ func Season(season string, year int) string {
 // Source converts an AniList source enum to a display string.
 func Source(s string) string {
 	switch s {
-	case "MANGA":
-		return "Manga"
-	case "LIGHT_NOVEL":
+	case sourceManga:
+		return displayManga
+	case sourceLightNovel:
 		return "Light Novel"
-	case "ORIGINAL":
+	case sourceOriginal:
 		return "Original"
-	case "VISUAL_NOVEL":
+	case sourceVisualNovel:
 		return "Visual Novel"
-	case "VIDEO_GAME":
+	case sourceVideoGame:
 		return "Video Game"
-	case "NOVEL":
-		return "Novel"
-	case "DOUJINSHI":
+	case sourceNovel:
+		return displayNovel
+	case sourceDoujinshi:
 		return "Doujinshi"
-	case "ANIME":
+	case sourceAnime:
 		return "Anime"
-	case "OTHER":
+	case sourceOther:
 		return "Other"
 	default:
 		if s == "" {

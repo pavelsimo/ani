@@ -1,0 +1,57 @@
+{
+  "data": {
+    "Page": {
+      "pageInfo": {
+        "total": 50,
+        "currentPage": 1,
+        "lastPage": 3,
+        "hasNextPage": true,
+        "perPage": 2
+      },
+      "media": [
+        {
+          "id": 154587,
+          "type": "ANIME",
+          "title": {
+            "romaji": "Sousou no Frieren",
+            "english": "Frieren: Beyond Journey's End",
+            "native": "葬送のフリーレン"
+          },
+          "genres": ["Adventure", "Drama", "Fantasy"],
+          "averageScore": 91,
+          "popularity": 850000,
+          "format": "TV",
+          "episodes": 28,
+          "chapters": null,
+          "volumes": null,
+          "status": "FINISHED",
+          "season": "FALL",
+          "seasonYear": 2023,
+          "startDate": {"year": 2023, "month": 9, "day": 29},
+          "nextAiringEpisode": null
+        },
+        {
+          "id": 101922,
+          "type": "ANIME",
+          "title": {
+            "romaji": "Kimetsu no Yaiba",
+            "english": "Demon Slayer: Kimetsu no Yaiba",
+            "native": "鬼滅の刃"
+          },
+          "genres": ["Action", "Fantasy"],
+          "averageScore": 83,
+          "popularity": 1200000,
+          "format": "TV",
+          "episodes": 26,
+          "chapters": null,
+          "volumes": null,
+          "status": "FINISHED",
+          "season": "SPRING",
+          "seasonYear": 2019,
+          "startDate": {"year": 2019, "month": 4, "day": 6},
+          "nextAiringEpisode": null
+        }
+      ]
+    }
+  }
+}

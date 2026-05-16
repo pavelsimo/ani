@@ -37,6 +37,8 @@ linters:
         linters:
           - gosec
           - errcheck
+          - goconst
+          - unparam
 
 issues:
   max-issues-per-linter: 0

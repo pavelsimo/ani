@@ -1,0 +1,83 @@
+{
+  "data": {
+    "Media": {
+      "id": 1,
+      "type": "ANIME",
+      "title": {
+        "romaji": "Cowboy Bebop",
+        "english": "Cowboy Bebop",
+        "native": "カウボーイビバップ"
+      },
+      "description": "A ragtag crew of bounty hunters chase down the galaxy's most dangerous criminals. They'll be lucky if they can keep the lights on aboard the Bebop.",
+      "format": "TV",
+      "episodes": 26,
+      "chapters": null,
+      "volumes": null,
+      "status": "FINISHED",
+      "season": "SPRING",
+      "seasonYear": 1998,
+      "startDate": {"year": 1998, "month": 4, "day": 3},
+      "averageScore": 86,
+      "popularity": 500000,
+      "duration": 24,
+      "source": "ORIGINAL",
+      "genres": ["Action", "Adventure", "Sci-Fi"],
+      "nextAiringEpisode": null,
+      "studios": {
+        "nodes": [{"name": "Sunrise"}]
+      },
+      "tags": [
+        {"name": "Space", "rank": 95, "isMediaSpoiler": false, "isGeneralSpoiler": false},
+        {"name": "Episodic", "rank": 90, "isMediaSpoiler": false, "isGeneralSpoiler": false},
+        {"name": "Tragedy", "rank": 75, "isMediaSpoiler": true, "isGeneralSpoiler": false}
+      ],
+      "relations": {
+        "edges": [
+          {
+            "relationType": "SEQUEL",
+            "node": {
+              "id": 5,
+              "type": "ANIME",
+              "title": {
+                "romaji": "Cowboy Bebop: Tengoku no Tobira",
+                "english": "Cowboy Bebop: The Movie"
+              },
+              "format": "MOVIE",
+              "status": "FINISHED"
+            }
+          }
+        ]
+      },
+      "externalLinks": [
+        {
+          "site": "Crunchyroll",
+          "url": "https://www.crunchyroll.com/cowboy-bebop",
+          "type": "STREAMING"
+        },
+        {
+          "site": "AniList",
+          "url": "https://anilist.co/anime/1",
+          "type": "INFO"
+        }
+      ],
+      "recommendations": {
+        "nodes": [
+          {
+            "rating": 120,
+            "mediaRecommendation": {
+              "id": 205,
+              "type": "ANIME",
+              "title": {
+                "romaji": "Samurai Champloo",
+                "english": "Samurai Champloo"
+              },
+              "format": "TV",
+              "status": "FINISHED",
+              "averageScore": 84
+            }
+          }
+        ]
+      }
+    }
+  }
+}
