@@ -557,11 +557,12 @@ func (m Model) viewDetail() string {
 	sb.WriteString("\n")
 
 	// Scrollable content
-	if m.detailLoading {
+	switch {
+	case m.detailLoading:
 		sb.WriteString(loading.Render(m.spinner.View() + " fetching details…"))
-	} else if m.detailErr != nil {
+	case m.detailErr != nil:
 		sb.WriteString(errorStyle.Render("error: " + m.detailErr.Error()))
-	} else {
+	default:
 		sb.WriteString(m.vp.View())
 	}
 

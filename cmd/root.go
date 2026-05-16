@@ -9,6 +9,7 @@ import (
 const (
 	keyPage    = "page"
 	keyPerPage = "perPage"
+	keyType    = "type"
 )
 
 var rootCmd = &cobra.Command{

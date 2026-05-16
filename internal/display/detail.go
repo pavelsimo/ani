@@ -61,24 +61,24 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 	// Info grid — single column, label padded to 11 chars
 	type kv struct{ label, value string }
 	var fields []kv
-	if strings.ToUpper(opts.MediaType) == "MANGA" {
+	if strings.ToUpper(opts.MediaType) == mediaTypeMANGA {
 		fields = []kv{
-			{"Format", Format(media.Format)},
+			{colFormat, Format(media.Format)},
 			{"Chapters", Chapters(media.Chapters)},
 			{"Volumes", Volumes(media.Volumes)},
-			{"Status", Status(media.Status)},
-			{"Score", Score(media.AverageScore)},
-			{"Users", Popularity(media.Popularity)},
+			{colStatus, Status(media.Status)},
+			{colScore, Score(media.AverageScore)},
+			{colUsers, Popularity(media.Popularity)},
 			{"Source", Source(media.Source)},
 		}
 	} else {
 		fields = []kv{
-			{"Format", Format(media.Format)},
+			{colFormat, Format(media.Format)},
 			{"Episodes", Episodes(media.Episodes)},
-			{"Status", Status(media.Status)},
-			{"Score", Score(media.AverageScore)},
+			{colStatus, Status(media.Status)},
+			{colScore, Score(media.AverageScore)},
 			{"Season", Season(media.Season, media.SeasonYear)},
-			{"Users", Popularity(media.Popularity)},
+			{colUsers, Popularity(media.Popularity)},
 			{"Studio", Studios(media.Studios)},
 			{"Source", Source(media.Source)},
 		}
@@ -144,12 +144,12 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 			title := TitleFromTitle(r.Node.Title, lang)
 			format := Format(r.Node.Format)
 			if opts.NoColor {
-				sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n", relType, title, format))
+				fmt.Fprintf(&sb, "  %-12s %s (%s)\n", relType, title, format)
 			} else {
-				sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n",
+				fmt.Fprintf(&sb, "  %-12s %s (%s)\n",
 					detailLabelStyle.Render(relType),
 					detailValueStyle.Render(title),
-					detailLabelStyle.Render(format)))
+					detailLabelStyle.Render(format))
 			}
 		}
 		sb.WriteString("\n")
@@ -170,11 +170,11 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 		}
 		for _, l := range streamLinks {
 			if opts.NoColor {
-				sb.WriteString(fmt.Sprintf("  %-14s %s\n", l.Site, l.URL))
+				fmt.Fprintf(&sb, "  %-14s %s\n", l.Site, l.URL)
 			} else {
-				sb.WriteString(fmt.Sprintf("  %-14s %s\n",
+				fmt.Fprintf(&sb, "  %-14s %s\n",
 					detailLabelStyle.Render(l.Site),
-					detailValueStyle.Hyperlink(l.URL).Render(l.URL)))
+					detailValueStyle.Hyperlink(l.URL).Render(l.URL))
 			}
 		}
 		sb.WriteString("\n")

@@ -24,6 +24,14 @@ var (
 			Foreground(lipgloss.Color("#e6edf3"))
 )
 
+const (
+	mediaTypeMANGA = "MANGA"
+	colFormat      = "Format"
+	colStatus      = "Status"
+	colScore       = "Score"
+	colUsers       = "Users"
+)
+
 // Render produces a lipgloss table string from a slice of media entries.
 // mediaType should be "ANIME" or "MANGA" and controls which columns are shown.
 func Render(media []anilist.Media, lang string, noColor bool, mediaType string) string {
@@ -34,8 +42,8 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 	var headers []string
 	rows := make([][]string, len(media))
 
-	if strings.ToUpper(mediaType) == "MANGA" {
-		headers = []string{"Title", "Genres", "Score", "Users", "Format", "Chs", "Vols", "Status"}
+	if strings.ToUpper(mediaType) == mediaTypeMANGA {
+		headers = []string{"Title", "Genres", colScore, colUsers, colFormat, "Chs", "Vols", colStatus}
 		for i, m := range media {
 			rows[i] = []string{
 				Truncate(Title(m, lang), 40),
@@ -49,7 +57,7 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 			}
 		}
 	} else {
-		headers = []string{"Title", "Genres", "Score", "Users", "Format", "Eps", "Status", "Next Ep"}
+		headers = []string{"Title", "Genres", colScore, colUsers, colFormat, "Eps", colStatus, "Next Ep"}
 		for i, m := range media {
 			rows[i] = []string{
 				Truncate(Title(m, lang), 40),

@@ -27,10 +27,10 @@ var searchCmd = &cobra.Command{
 		asJSON, _ := cmd.Flags().GetBool("json")
 		noColor, _ := cmd.Flags().GetBool("no-color")
 		lang, _ := cmd.Flags().GetString("lang")
-		mediaType, _ := cmd.Flags().GetString("type")
+		mediaType, _ := cmd.Flags().GetString(keyType)
 
 		vars := map[string]any{
-			"type":     strings.ToUpper(mediaType),
+			keyType:    strings.ToUpper(mediaType),
 			keyPage:    page,
 			keyPerPage: perPage,
 		}
