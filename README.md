@@ -1,4 +1,4 @@
-# 🌸 ani
+# 🦊 ani
 
 Browse and search AniList anime from your terminal.
 
@@ -7,6 +7,8 @@ Browse and search AniList anime from your terminal.
 [![Go 1.25](https://img.shields.io/badge/Go-1.25-2ea44f?style=flat-square&logoColor=white)](https://go.dev)
 [![Homebrew](https://img.shields.io/badge/Homebrew-b28f62?style=flat-square&logoColor=white)](https://github.com/pavelsimo/homebrew-tap)
 [![DeepWiki](https://img.shields.io/badge/DeepWiki-0088cc?style=flat-square&logoColor=white)](https://deepwiki.com/pavelsimo/ani)
+
+![ani banner](banner.png)
 
 ## Installation
 

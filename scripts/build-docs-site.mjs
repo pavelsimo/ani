@@ -245,7 +245,7 @@ function sidebarHtml(pages, currentSlug) {
   return `<nav class="sidebar" id="sidebar" aria-label="Site navigation">
   <div class="sidebar-brand">
     <a href="index.html" class="brand-link">
-      <span class="brand-mark">🌸</span>
+      <span class="brand-mark">🦊</span>
       ${TOOL}
     </a>
   </div>
@@ -267,7 +267,7 @@ function sidebarHtml(pages, currentSlug) {
 function heroHtml() {
   return `<section class="hero">
   <p class="hero-eyebrow">CLI Tool</p>
-  <h1 class="hero-title">🌸 ${TOOL}</h1>
+  <h1 class="hero-title">🦊 ${TOOL}</h1>
   <p class="hero-desc">${esc(DESC)}</p>
   <div class="hero-actions">
     <a class="btn-primary" href="install.html">Get started</a>
