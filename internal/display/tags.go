@@ -21,6 +21,7 @@ var genrePalette = []color.Color{
 
 var tagBase = lipgloss.NewStyle().
 	Padding(0, 1).
+	MarginRight(1).
 	Bold(false)
 
 // colorForGenre returns a stable color for a genre name.
@@ -43,5 +44,5 @@ func RenderTags(genres []string) string {
 		style := tagBase.Foreground(color).Border(lipgloss.RoundedBorder()).BorderForeground(color)
 		tags[i] = style.Render(strings.ToLower(g))
 	}
-	return strings.Join(tags, " ")
+	return lipgloss.JoinHorizontal(lipgloss.Center, tags...)
 }

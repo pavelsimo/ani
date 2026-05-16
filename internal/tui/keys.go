@@ -9,6 +9,7 @@ type keyMap struct {
 	PrevTab key.Binding
 	Search  key.Binding
 	Refresh key.Binding
+	Enter   key.Binding
 	Confirm key.Binding
 	Escape  key.Binding
 	Quit    key.Binding
@@ -38,6 +39,10 @@ var keys = keyMap{
 	Refresh: key.NewBinding(
 		key.WithKeys("r"),
 		key.WithHelp("r", "refresh"),
+	),
+	Enter: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "open detail"),
 	),
 	Confirm: key.NewBinding(
 		key.WithKeys("enter"),

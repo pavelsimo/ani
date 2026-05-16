@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/pavelsimo/ani/internal/anilist"
@@ -36,6 +37,12 @@ type loadedMsg struct {
 	err   error
 }
 
+// detailLoadedMsg carries the result of a detail fetch.
+type detailLoadedMsg struct {
+	media anilist.Media
+	err   error
+}
+
 // Model is the root Bubble Tea model.
 type Model struct {
 	client    *anilist.Client
@@ -52,6 +59,12 @@ type Model struct {
 	searchMode  bool
 	searchInput textinput.Model
 	spinner     spinner.Model
+
+	detailMode    bool
+	detailLoading bool
+	detailErr     error
+	detailMedia   *anilist.Media
+	vp            viewport.Model
 }
 
 // New creates a new TUI model.
@@ -88,6 +101,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		if m.detailMode && m.detailMedia != nil {
+			m.vp.Width = m.detailVPWidth()
+			m.vp.Height = m.detailVPHeight()
+			m.vp.SetContent(m.renderDetailContent(*m.detailMedia))
+		}
 
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -99,7 +117,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.media[msg.tab] = msg.media
 		m.err[msg.tab] = msg.err
 
+	case detailLoadedMsg:
+		m.detailLoading = false
+		if msg.err != nil {
+			m.detailErr = msg.err
+		} else {
+			m.detailMedia = &msg.media
+			m.vp = viewport.New(m.detailVPWidth(), m.detailVPHeight())
+			m.vp.SetContent(m.renderDetailContent(msg.media))
+		}
+
 	case tea.KeyMsg:
+		if m.detailMode {
+			cmds = append(cmds, m.handleDetailKey(msg)...)
+			break
+		}
 		if m.searchMode {
 			cmds = append(cmds, m.handleSearchKey(msg)...)
 			break
@@ -127,6 +159,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor[m.activeTab]--
 			}
 
+		case key.Matches(msg, keys.Enter):
+			tab := m.activeTab
+			if len(m.media[tab]) > 0 {
+				selected := m.media[tab][m.cursor[tab]]
+				m.detailMode = true
+				m.detailLoading = true
+				m.detailErr = nil
+				m.detailMedia = nil
+				cmds = append(cmds, m.fetchDetail(selected.ID))
+			}
+
 		case key.Matches(msg, keys.Search):
 			m.searchMode = true
 			m.searchInput.SetValue("")
@@ -140,6 +183,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m *Model) handleDetailKey(msg tea.KeyMsg) []tea.Cmd {
+	switch {
+	case key.Matches(msg, keys.Quit):
+		return []tea.Cmd{tea.Quit}
+	case key.Matches(msg, keys.Escape):
+		m.detailMode = false
+		m.detailMedia = nil
+		m.detailErr = nil
+		return nil
+	default:
+		var cmd tea.Cmd
+		m.vp, cmd = m.vp.Update(msg)
+		return []tea.Cmd{cmd}
+	}
+}
+
+func (m Model) detailVPWidth() int {
+	w := m.width - 4
+	if w < 20 {
+		return 20
+	}
+	return w
+}
+
+func (m Model) detailVPHeight() int {
+	h := m.height - 5
+	if h < 5 {
+		return 5
+	}
+	return h
 }
 
 func (m *Model) handleSearchKey(msg tea.KeyMsg) []tea.Cmd {
@@ -173,6 +248,10 @@ func (m *Model) handleSearchKey(msg tea.KeyMsg) []tea.Cmd {
 func (m Model) View() string {
 	if m.width == 0 {
 		return ""
+	}
+
+	if m.detailMode {
+		return m.viewDetail()
 	}
 
 	var sb strings.Builder
@@ -269,6 +348,7 @@ func (m Model) renderItem(media anilist.Media) string {
 func (m Model) viewStatusBar() string {
 	hint := statusBar.Render(
 		statusKey.Render("↑↓") + " navigate  " +
+			statusKey.Render("enter") + " detail  " +
 			statusKey.Render("/") + " search  " +
 			statusKey.Render("tab") + " switch  " +
 			statusKey.Render("r") + " refresh  " +
@@ -340,6 +420,142 @@ func (m *Model) fetchSearch(query string) tea.Cmd {
 		}
 		return loadedMsg{tab: tabSearch, media: page.Media}
 	}
+}
+
+func (m *Model) fetchDetail(id int) tea.Cmd {
+	client := m.client
+	return func() tea.Msg {
+		ctx := context.Background()
+		media, err := client.QueryMedia(ctx, id)
+		if err != nil {
+			return detailLoadedMsg{err: err}
+		}
+		return detailLoadedMsg{media: *media}
+	}
+}
+
+func (m Model) viewDetail() string {
+	var sb strings.Builder
+
+	// Fixed title header (outside viewport)
+	title := ""
+	native := ""
+	if m.detailMedia != nil {
+		title = display.TitleFromTitle(m.detailMedia.Title, m.lang)
+		if m.detailMedia.Title.Native != "" && m.detailMedia.Title.Native != title {
+			native = m.detailMedia.Title.Native
+		}
+	} else if m.detailLoading {
+		title = "Loading…"
+	}
+
+	header := detailTitle.Width(m.width).Render(title)
+	if native != "" {
+		header += "\n" + detailNative.Width(m.width).Render(native)
+	}
+	sb.WriteString(detailHeader.Width(m.width).Render(header))
+	sb.WriteString("\n")
+
+	// Scrollable content
+	if m.detailLoading {
+		sb.WriteString(loading.Render(m.spinner.View() + " fetching details…"))
+	} else if m.detailErr != nil {
+		sb.WriteString(errorStyle.Render("error: " + m.detailErr.Error()))
+	} else {
+		sb.WriteString(m.vp.View())
+	}
+
+	sb.WriteString("\n")
+
+	// Status bar
+	bar := statusBar.Render(
+		statusKey.Render("esc") + " back  " +
+			statusKey.Render("↑↓ j/k") + " scroll",
+	)
+	sb.WriteString(bar)
+	return sb.String()
+}
+
+func (m Model) renderDetailContent(media anilist.Media) string {
+	w := m.detailVPWidth()
+
+	var sb strings.Builder
+
+	// Info fields — single column, label padded to fixed width
+	type kv struct{ label, value string }
+	fields := []kv{
+		{"Format", display.Format(media.Format)},
+		{"Episodes", display.Episodes(media.Episodes)},
+		{"Status", display.Status(media.Status)},
+		{"Score", display.Score(media.AverageScore)},
+		{"Season", display.Season(media.Season, media.SeasonYear)},
+		{"Users", display.Popularity(media.Popularity)},
+		{"Studio", display.Studios(media.Studios)},
+		{"Source", display.Source(media.Source)},
+	}
+	if media.Duration != nil && *media.Duration > 0 {
+		fields = append(fields, kv{"Duration", display.Duration(media.Duration)})
+	}
+	for _, f := range fields {
+		label := fmt.Sprintf("%-11s", f.label+":")
+		sb.WriteString("  " + detailLabel.Render(label) + " " + detailValue.Render(f.value) + "\n")
+	}
+	sb.WriteString("\n")
+
+	// Genres
+	if len(media.Genres) > 0 {
+		sb.WriteString(detailSectionHdr.Render("Genres") + "\n")
+		for _, line := range strings.Split(display.RenderTags(media.Genres), "\n") {
+			if line != "" {
+				sb.WriteString("  " + line + "\n")
+			}
+		}
+		sb.WriteString("\n")
+	}
+
+	// Tags (top 5 non-spoiler)
+	tags := display.TopNonSpoilerTags(media.Tags, 5)
+	if len(tags) > 0 {
+		names := make([]string, len(tags))
+		for i, t := range tags {
+			names[i] = t.Name
+		}
+		sb.WriteString(detailSectionHdr.Render("Tags") + "\n")
+		for _, line := range strings.Split(display.RenderTags(names), "\n") {
+			if line != "" {
+				sb.WriteString("  " + line + "\n")
+			}
+		}
+		sb.WriteString("\n")
+	}
+
+	// Relations (ANIME only, meaningful types)
+	rels := display.AnimeRelations(media.Relations)
+	if len(rels) > 0 {
+		sb.WriteString(detailSectionHdr.Render("Relations") + "\n")
+		for _, r := range rels {
+			relType := display.FormatRelationType(r.RelationType)
+			title := display.TitleFromTitle(r.Node.Title, m.lang)
+			format := display.Format(r.Node.Format)
+			sb.WriteString(fmt.Sprintf("  %-12s %s (%s)\n",
+				detailLabel.Render(relType),
+				detailValue.Render(title),
+				detailLabel.Render(format)))
+		}
+		sb.WriteString("\n")
+	}
+
+	// Synopsis
+	if media.Description != "" {
+		sb.WriteString(detailSectionHdr.Render("Synopsis") + "\n")
+		synopsis := display.StripHTML(media.Description)
+		wrapped := display.WrapText(synopsis, w-2)
+		for _, line := range strings.Split(wrapped, "\n") {
+			sb.WriteString("  " + line + "\n")
+		}
+	}
+
+	return sb.String()
 }
 
 // Start launches the TUI.

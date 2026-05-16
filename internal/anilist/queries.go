@@ -61,6 +61,29 @@ query ($page: Int, $perPage: Int) {
   }
 }`
 
+// QueryDetail fetches full detail for a single anime by ID.
+const QueryDetail = `
+query ($id: Int) {
+  Media(id: $id, type: ANIME) {
+    id
+    title { romaji english native }
+    description(asHtml: false)
+    format episodes status season seasonYear
+    startDate { year month day }
+    averageScore popularity duration source
+    genres
+    nextAiringEpisode { episode timeUntilAiring }
+    studios(isMain: true) { nodes { name } }
+    tags { name rank isMediaSpoiler isGeneralSpoiler }
+    relations {
+      edges {
+        relationType(version: 2)
+        node { id title { romaji english } type format status }
+      }
+    }
+  }
+}`
+
 // QuerySearch fetches anime matching the given filters.
 const QuerySearch = `
 query (

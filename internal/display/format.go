@@ -2,10 +2,14 @@ package display
 
 import (
 	"fmt"
+	"html"
+	"regexp"
 	"strings"
 
 	"github.com/pavelsimo/ani/internal/anilist"
 )
+
+var htmlTagRe = regexp.MustCompile(`<[^>]+>`)
 
 // Title returns the display title for a media entry based on the language preference.
 func Title(m anilist.Media, lang string) string {
@@ -117,4 +121,140 @@ func Truncate(s string, maxLen int) string {
 		return s
 	}
 	return string(runes[:maxLen-1]) + "…"
+}
+
+// TitleFromTitle returns the display title from a Title struct.
+func TitleFromTitle(t anilist.Title, lang string) string {
+	if strings.ToLower(lang) == "english" && t.English != "" {
+		return t.English
+	}
+	if t.Romaji != "" {
+		return t.Romaji
+	}
+	return t.English
+}
+
+// Season formats a season + year into a display string.
+func Season(season string, year int) string {
+	s := ""
+	switch season {
+	case "WINTER":
+		s = "Winter"
+	case "SPRING":
+		s = "Spring"
+	case "SUMMER":
+		s = "Summer"
+	case "FALL":
+		s = "Fall"
+	}
+	if s == "" && year == 0 {
+		return "—"
+	}
+	if year > 0 && s != "" {
+		return fmt.Sprintf("%s %d", s, year)
+	}
+	if year > 0 {
+		return fmt.Sprintf("%d", year)
+	}
+	return s
+}
+
+// Source converts an AniList source enum to a display string.
+func Source(s string) string {
+	switch s {
+	case "MANGA":
+		return "Manga"
+	case "LIGHT_NOVEL":
+		return "Light Novel"
+	case "ORIGINAL":
+		return "Original"
+	case "VISUAL_NOVEL":
+		return "Visual Novel"
+	case "VIDEO_GAME":
+		return "Video Game"
+	case "NOVEL":
+		return "Novel"
+	case "DOUJINSHI":
+		return "Doujinshi"
+	case "ANIME":
+		return "Anime"
+	case "OTHER":
+		return "Other"
+	default:
+		if s == "" {
+			return "—"
+		}
+		return s
+	}
+}
+
+// Duration formats episode duration in minutes.
+func Duration(d *int) string {
+	if d == nil || *d == 0 {
+		return "—"
+	}
+	return fmt.Sprintf("%d min/ep", *d)
+}
+
+// Studios formats the list of studio names.
+func Studios(studios []anilist.Studio) string {
+	if len(studios) == 0 {
+		return "—"
+	}
+	names := make([]string, len(studios))
+	for i, s := range studios {
+		names[i] = s.Name
+	}
+	return strings.Join(names, ", ")
+}
+
+// StripHTML removes HTML tags and converts <br> to newlines.
+func StripHTML(s string) string {
+	s = strings.ReplaceAll(s, "<br />", "\n")
+	s = strings.ReplaceAll(s, "<br/>", "\n")
+	s = strings.ReplaceAll(s, "<br>", "\n")
+	s = htmlTagRe.ReplaceAllString(s, "")
+	s = html.UnescapeString(s)
+	return strings.TrimSpace(s)
+}
+
+// WrapText word-wraps text to the given column width, preserving existing newlines.
+func WrapText(text string, width int) string {
+	if width <= 0 {
+		return text
+	}
+	paragraphs := strings.Split(text, "\n")
+	result := make([]string, len(paragraphs))
+	for i, p := range paragraphs {
+		result[i] = wrapParagraph(p, width)
+	}
+	return strings.Join(result, "\n")
+}
+
+func wrapParagraph(text string, width int) string {
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return ""
+	}
+	var lines []string
+	var curr strings.Builder
+	currLen := 0
+	for _, word := range words {
+		wl := len([]rune(word))
+		if currLen > 0 && currLen+1+wl > width {
+			lines = append(lines, curr.String())
+			curr.Reset()
+			currLen = 0
+		}
+		if currLen > 0 {
+			curr.WriteByte(' ')
+			currLen++
+		}
+		curr.WriteString(word)
+		currLen += wl
+	}
+	if curr.Len() > 0 {
+		lines = append(lines, curr.String())
+	}
+	return strings.Join(lines, "\n")
 }

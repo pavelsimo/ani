@@ -18,6 +18,42 @@ type Media struct {
 	StartDate  FuzzyDate `json:"startDate"`
 
 	NextAiringEpisode *AiringEpisode `json:"nextAiringEpisode"`
+
+	// Detail-only fields (populated by QueryMedia, zero/nil from list queries).
+	Description string         `json:"description,omitempty"`
+	Duration    *int           `json:"duration,omitempty"`
+	Source      string         `json:"source,omitempty"`
+	Studios     []Studio       `json:"studios,omitempty"`
+	Tags        []Tag          `json:"tags,omitempty"`
+	Relations   []RelationEdge `json:"relations,omitempty"`
+}
+
+// Studio represents an anime production studio.
+type Studio struct {
+	Name string `json:"name"`
+}
+
+// Tag represents an AniList tag/theme.
+type Tag struct {
+	Name             string `json:"name"`
+	Rank             int    `json:"rank"`
+	IsMediaSpoiler   bool   `json:"isMediaSpoiler"`
+	IsGeneralSpoiler bool   `json:"isGeneralSpoiler"`
+}
+
+// RelationEdge is a typed link between two media entries.
+type RelationEdge struct {
+	RelationType string       `json:"relationType"`
+	Node         RelationNode `json:"node"`
+}
+
+// RelationNode holds basic info about a related media entry.
+type RelationNode struct {
+	ID     int    `json:"id"`
+	Title  Title  `json:"title"`
+	Type   string `json:"type"`
+	Format string `json:"format"`
+	Status string `json:"status"`
 }
 
 // Title holds localized titles for a media entry.

@@ -56,4 +56,30 @@ var (
 	errorStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#f78166")).
 			Padding(1, 2)
+
+	// Detail view styles
+	detailTitle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#e6edf3")).
+			Padding(0, 2)
+
+	detailNative = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#7d8590")).
+			Padding(0, 2)
+
+	detailHeader = lipgloss.NewStyle().
+			Background(lipgloss.Color("#0d1117")).
+			BorderBottom(true).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("#21262d"))
+
+	detailSectionHdr = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color("#58a6ff"))
+
+	detailLabel = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#7d8590"))
+
+	detailValue = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#e6edf3"))
 )
