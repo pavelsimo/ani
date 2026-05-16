@@ -76,6 +76,10 @@ ani trending --json | jq '.[0].title.romaji'
 
 Full documentation at **[pavelsimo.github.io/ani](https://pavelsimo.github.io/ani)**.
 
+## Acknowledgements
+
+Anime data is provided by [AniList](https://anilist.co) via their free GraphQL API.
+
 ## License
 
 MIT
