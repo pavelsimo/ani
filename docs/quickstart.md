@@ -63,7 +63,8 @@ ani top --page 3 --limit 50
 ## Change title language
 
 ```bash
-ani trending --lang english
+ani trending --lang romaji
+ani trending --lang native
 ```
 
-Valid values are `romaji` (default) and `english`.
+Valid values are `romaji`, `english` (default), and `native`.

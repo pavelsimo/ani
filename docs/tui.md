@@ -25,10 +25,11 @@ Switching tabs is instant after the first load.
 |-----|--------|
 | `↑` / `k` | Move up |
 | `↓` / `j` | Move down |
-| `→` / `Tab` | Next tab |
-| `←` / `Shift+Tab` | Previous tab |
+| `→` / `Tab` / `l` | Next tab |
+| `←` / `Shift+Tab` / `h` | Previous tab |
+| `]` | Next page |
 | `/` | Open search input |
-| `Enter` | Confirm search |
+| `Enter` | Open detail / confirm search |
 | `Esc` | Cancel search |
 | `r` | Refresh current tab |
 | `q` / `Ctrl+C` | Quit |
@@ -41,8 +42,9 @@ Press `Esc` to cancel without searching.
 
 ## Title language
 
-Launch with `--lang english` to display English titles instead of romaji:
+The default language is `english`. Launch with `--lang romaji` or `--lang native` to switch:
 
 ```bash
-ani --lang english
+ani --lang romaji
+ani --lang native
 ```

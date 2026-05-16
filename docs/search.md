@@ -32,7 +32,7 @@ You must provide at least a query or one filter flag.
 
 **`--format`:** `tv`, `ova`, `ona`, `movie`, `special`
 
-**`--status`:** `airing`, `finished`, `upcoming`
+**`--status`:** `airing` (alias: `releasing`), `finished`, `upcoming` (alias: `not_yet_released`), `cancelled`
 
 ## Examples
 

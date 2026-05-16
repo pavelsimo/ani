@@ -14,7 +14,8 @@ These flags apply to every command.
 | `--quiet` | `-q` | `false` | Suppress non-essential output |
 | `--json` | — | `false` | Output results as a JSON array |
 | `--no-color` | — | `false` | Disable ANSI color output |
-| `--lang` | — | `romaji` | Title language: `romaji` or `english` |
+| `--lang` | — | `english` | Title language: `romaji`, `english`, or `native` |
+| `--type` | — | `anime` | Media type: `anime` or `manga` |
 
 ## Environment variables
 

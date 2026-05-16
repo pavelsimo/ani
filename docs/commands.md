@@ -16,7 +16,7 @@ See the [TUI Guide](tui.html) for keybindings and tab details.
 
 ## ani trending
 
-Currently trending anime on AniList.
+Currently trending anime or manga on AniList (use `--type manga` for manga).
 
 ```bash
 ani trending
@@ -30,7 +30,7 @@ ani trending --page 2 --per-page 10
 
 ## ani popular
 
-Popular anime for the current or a specified season.
+Popular anime (or manga with `--type manga`) for the current or a specified season.
 
 ```bash
 ani popular
@@ -46,7 +46,7 @@ ani popular --season winter --year 2024
 
 ## ani upcoming
 
-Anime that have not yet started airing.
+Titles that have not yet started airing (use `--type manga` for unreleased manga).
 
 ```bash
 ani upcoming
@@ -60,7 +60,7 @@ ani upcoming --page 2
 
 ## ani all-time
 
-Most popular anime of all time by AniList popularity score.
+Most popular anime (or manga with `--type manga`) of all time by AniList popularity score.
 
 ```bash
 ani all-time
@@ -74,7 +74,7 @@ ani all-time --per-page 50
 
 ## ani top
 
-Highest-scored anime by average score.
+Highest-scored anime or manga by average score (use `--type manga` for manga).
 
 ```bash
 ani top
@@ -85,6 +85,20 @@ ani top --limit 50 --page 2
 |------|---------|-------------|
 | `--limit` | `20` | Number of results (max 50 per page) |
 | `--page` | `1` | Page number |
+
+## ani info
+
+Show full details for a single title by its AniList ID.
+
+```bash
+ani info 1
+ani info 1 --json
+ani info 1 --lang romaji
+```
+
+The AniList ID is a positive integer visible in the AniList URL (e.g. `anilist.co/anime/1`).
+
+The detail view includes synopsis, score, studios, genres, tags (top non-spoiler), relations (prequel/sequel/etc.), and streaming links. Supports `--json`, `--lang`, and `--no-color`.
 
 ## ani version
 
