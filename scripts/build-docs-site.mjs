@@ -273,11 +273,8 @@ function heroHtml() {
     <a class="btn-primary" href="install.html">Get started</a>
     <a class="btn-outline" href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
   </div>
-  <div class="install-cmd">
-    <span class="install-label">Install</span>
-    <code>brew install ${TOOL}</code>
-    <button class="copy-btn" data-copy="brew install ${TOOL}">Copy</button>
-  </div>
+  <div class="code-wrap"><pre><code>brew install ${TOOL}</code></pre>
+<button class="copy-btn">Copy</button></div>
 </section>`;
 }
 
@@ -365,12 +362,9 @@ hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
 }
 .brand-link:hover{color:var(--accent);text-decoration:none}
 .brand-mark{
-  width:30px;height:30px;border-radius:8px;
-  background:var(--accent);
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:1.4rem;line-height:1;
 }
-.brand-mark svg{fill:#fff}
-[data-theme=dark] .brand-mark svg{fill:#0a0e16}
 
 /* sidebar nav */
 .sidebar-nav{list-style:none;flex:1}
@@ -494,16 +488,6 @@ hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
   transition:border-color .15s,color .15s;
 }
 .btn-outline:hover{border-color:var(--accent);color:var(--ink);text-decoration:none}
-.install-cmd{
-  display:inline-flex;align-items:center;gap:12px;
-  background:var(--code-bg);color:var(--code-fg);
-  border:1px solid var(--code-border);
-  padding:10px 10px 10px 16px;border-radius:8px;
-  font:500 .9rem/1.2 var(--font-mono);max-width:32em;
-}
-.install-cmd code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
-.install-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-
 /* ── Typography ─────────────────────────────────────── */
 .main h1{font-size:2.5rem;font-weight:700;line-height:1.08;color:var(--ink);margin-bottom:1rem;letter-spacing:-.02em}
 .main h2{font-size:1.4rem;font-weight:600;line-height:1.2;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:.4rem;margin:2.5rem 0 1rem;scroll-margin-top:24px}
