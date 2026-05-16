@@ -180,8 +180,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, m.ensureLoaded(m.activeTab))
 
 		case key.Matches(msg, keys.Down):
-			if n := len(m.media[m.activeTab]); n > 0 {
-				m.cursor[m.activeTab] = min(m.cursor[m.activeTab]+1, n-1)
+			tab := m.activeTab
+			if n := len(m.media[tab]); n > 0 {
+				if m.cursor[tab] < n-1 {
+					m.cursor[tab]++
+				} else if m.hasNextPage[tab] && !m.loading[tab] && !m.loadingMore[tab] {
+					m.loadingMore[tab] = true
+					cmds = append(cmds, m.fetchNextPage(tab))
+				}
 			}
 
 		case key.Matches(msg, keys.Up):
