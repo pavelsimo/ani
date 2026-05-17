@@ -1,4 +1,5 @@
 
+# 🦊 ani
 
 <p align="center"><img src="banner.png" width="600" alt="ani banner"></p>
 
@@ -11,7 +12,9 @@
 </p>
 
 
-`ani` is a cli for browsing anime and manga on [AniList](https://anilist.co).
+`ani` is a CLI for anime and manga — trending, popular, upcoming, all-time, top 100, and search. Built for terminals, scripts, and AI coding agents.
+
+Uses the [AniList](https://anilist.co) GraphQL API. No account or API key needed.
 
 ## Installation
 
@@ -89,10 +92,6 @@ Use `--type manga` on any browse or search command to query manga instead of ani
 ## Docs
 
 Full documentation at **[pavelsimo.github.io/ani](https://pavelsimo.github.io/ani)**.
-
-## Acknowledgements
-
-Anime data is provided by [AniList](https://anilist.co) via their free GraphQL API.
 
 ## License
 

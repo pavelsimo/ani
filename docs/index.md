@@ -1,10 +1,9 @@
 ---
 title: 🦊 ani
-description: browse and search AniList anime from your terminal
+description: browse and search anime and manga on AniList from your terminal
 ---
 
-ani is a zero-config CLI for exploring AniList anime data from your terminal.
-Launch the interactive TUI, filter by genre, stream JSON output into `jq` — no API key required.
+ani is a CLI for anime and manga — trending, popular, upcoming, all-time, top 100, and search. Launch the interactive TUI, filter by genre, stream JSON output into `jq`. Uses the AniList GraphQL API. No account or API key needed.
 
 ## Why ani
 
