@@ -4,11 +4,13 @@ Browse and search [AniList](https://anilist.co) anime from your terminal.
 
 ![ani banner](banner.png)
 
-[![release](https://img.shields.io/github/v/release/pavelsimo/ani?style=flat-square&color=4d9e4d&logoColor=white)](https://github.com/pavelsimo/ani/releases)
-[![license MIT](https://img.shields.io/badge/license-MIT-ffd60a?style=flat-square&logoColor=white)](LICENSE)
-[![Go 1.25](https://img.shields.io/badge/Go-1.25-2ea44f?style=flat-square&logoColor=white)](https://go.dev)
-[![Homebrew](https://img.shields.io/badge/Homebrew-b28f62?style=flat-square&logoColor=white)](https://github.com/pavelsimo/homebrew-tap)
-[![DeepWiki](https://img.shields.io/badge/DeepWiki-0088cc?style=flat-square&logoColor=white)](https://deepwiki.com/pavelsimo/ani)
+<p align="center">
+  <a href="https://github.com/pavelsimo/ani/releases"><img src="https://img.shields.io/github/v/release/pavelsimo/ani?style=flat-square&color=4d9e4d&logoColor=white" alt="release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffd60a?style=flat-square&logoColor=white" alt="license MIT"></a>
+  <a href="https://go.dev"><img src="https://img.shields.io/badge/Go-1.25-2ea44f?style=flat-square&logoColor=white" alt="Go 1.25"></a>
+  <a href="https://github.com/pavelsimo/homebrew-tap"><img src="https://img.shields.io/badge/Homebrew-b28f62?style=flat-square&logoColor=white" alt="Homebrew"></a>
+  <a href="https://deepwiki.com/pavelsimo/ani"><img src="https://img.shields.io/badge/DeepWiki-0088cc?style=flat-square&logoColor=white" alt="DeepWiki"></a>
+</p>
 
 ## Installation
 
