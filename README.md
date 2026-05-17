@@ -1,6 +1,4 @@
-# 🦊 ani
 
-Browse and search [AniList](https://anilist.co) anime from your terminal.
 
 <p align="center"><img src="banner.png" width="600" alt="ani banner"></p>
 
@@ -11,6 +9,9 @@ Browse and search [AniList](https://anilist.co) anime from your terminal.
   <a href="https://github.com/pavelsimo/homebrew-tap"><img src="https://img.shields.io/badge/Homebrew-b28f62?style=flat-square&logoColor=white" alt="Homebrew"></a>
   <a href="https://deepwiki.com/pavelsimo/ani"><img src="https://img.shields.io/badge/DeepWiki-0088cc?style=flat-square&logoColor=white" alt="DeepWiki"></a>
 </p>
+
+
+`ani` is a cli for browsing anime and manga on [AniList](https://anilist.co).
 
 ## Installation
 
