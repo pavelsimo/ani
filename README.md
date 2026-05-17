@@ -2,7 +2,7 @@
 
 Browse and search [AniList](https://anilist.co) anime from your terminal.
 
-![ani banner](banner.png)
+<img src="banner.png" width="887" alt="ani banner">
 
 <p align="center">
   <a href="https://github.com/pavelsimo/ani/releases"><img src="https://img.shields.io/github/v/release/pavelsimo/ani?style=flat-square&color=4d9e4d&logoColor=white" alt="release"></a>
