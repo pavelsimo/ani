@@ -93,6 +93,24 @@ Use `--type manga` on any browse or search command to query manga instead of ani
 
 Full documentation at **[pavelsimo.github.io/ani](https://pavelsimo.github.io/ani)**.
 
+## Skill
+
+Install the `ani` [search-anime](https://github.com/pavelsimo/search-anime) skill.
+
+```bash
+npx skills@latest add pavelsimo/search-anime
+```
+
+Then search anime and manga with natural language queries:
+
+```
+/search-anime info when does the next episode of wistoria wand and sword air
+/search-anime search something like attack on titan
+/search-anime trending
+/search-anime search trending shonen anime
+/search-anime info fullmetal alchemist brotherhood
+```
+
 ## License
 
 MIT
