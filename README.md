@@ -105,9 +105,8 @@ Then search anime and manga with natural language queries:
 
 ```
 /search-anime info when does the next episode of wistoria wand and sword air
-/search-anime search something like attack on titan
-/search-anime trending
 /search-anime search trending shonen anime
+/search-anime search something like attack on titan
 /search-anime info fullmetal alchemist brotherhood
 ```
 
