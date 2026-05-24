@@ -44,3 +44,42 @@ release:
     name: ani
   draft: false
   prerelease: auto
+
+winget:
+  - name: ani
+    package_name: ani
+    package_identifier: pavelsimo.ani
+    publisher: pavelsimo
+    publisher_url: https://github.com/pavelsimo
+    publisher_support_url: https://github.com/pavelsimo/ani/issues
+    homepage: https://github.com/pavelsimo/ani
+    license: MIT
+    license_url: https://github.com/pavelsimo/ani/blob/main/LICENSE
+    copyright: Copyright (c) 2026 Pavel Simo
+    short_description: Browse and search anime and manga from your terminal
+    description: A terminal UI and CLI for browsing trending, popular, and upcoming anime and manga via AniList — with search, filters, and JSON output.
+    release_notes_url: https://github.com/pavelsimo/ani/releases/tag/{{ .Tag }}
+    installation_notes: ani installs as a portable CLI executable available on PATH.
+    tags:
+      - anime
+      - manga
+      - anilist
+      - cli
+      - tui
+    skip_upload: auto
+    commit_msg_template: "{{ .PackageIdentifier }}: {{ .Tag }}"
+    repository:
+      owner: pavelsimo
+      name: winget-pkgs
+      branch: "ani-{{ .Version }}"
+      token: "{{ .Env.WINGET_TOKEN }}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+    commit_author:
+      name: github-actions[bot]
+      email: github-actions[bot]@users.noreply.github.com
