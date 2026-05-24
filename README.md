@@ -25,6 +25,12 @@ brew tap pavelsimo/homebrew-tap
 brew install ani
 ```
 
+### Winget (Windows)
+
+```bash
+winget install pavelsimo.ani
+```
+
 ### Go install
 
 ```bash
