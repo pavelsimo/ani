@@ -101,7 +101,7 @@ Full documentation at **[pavelsimo.github.io/ani](https://pavelsimo.github.io/an
 
 ## Skill
 
-Install the `ani` [search-anime](https://github.com/pavelsimo/search-anime) skill.
+Install the `ani` [search-anime](https://github.com/pavelsimo/skills/tree/main/skills/search-anime) skill.
 
 ```bash
 npx skills@latest add pavelsimo/search-anime
