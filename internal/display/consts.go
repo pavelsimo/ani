@@ -46,9 +46,11 @@ const (
 	relTypeSpinOff     = "SPIN_OFF"
 )
 
-// mediaTypeAnime is the AniList media type for anime.
-// mediaTypeMANGA is defined in table.go.
-const mediaTypeAnime = "ANIME"
+// AniList media type enum values.
+const (
+	mediaTypeAnime = "ANIME"
+	mediaTypeManga = "MANGA"
+)
 
 // display strings shared across multiple formatters.
 const (

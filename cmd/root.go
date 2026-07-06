@@ -24,8 +24,6 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().BoolP("quiet", "q", false, "suppress non-essential output")
 	rootCmd.PersistentFlags().Bool("json", false, "output as JSON")
 	rootCmd.PersistentFlags().Bool("no-color", false, "disable color output")
 	rootCmd.PersistentFlags().String("lang", "english", "title language: romaji, english, or native")

@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -22,18 +21,18 @@ var searchCmd = &cobra.Command{
 		format, _ := cmd.Flags().GetString("format")
 		status, _ := cmd.Flags().GetString("status")
 		minScore, _ := cmd.Flags().GetInt("min-score")
-		page, _ := cmd.Flags().GetInt(keyPage)
-		perPage, _ := cmd.Flags().GetInt("per-page")
-		asJSON, _ := cmd.Flags().GetBool("json")
-		noColor, _ := cmd.Flags().GetBool("no-color")
-		lang, _ := cmd.Flags().GetString("lang")
-		mediaType, _ := cmd.Flags().GetString(keyType)
+		page, perPage, err := pageFlags(cmd)
+		if err != nil {
+			return err
+		}
+		g := getGlobalFlags(cmd)
 
 		vars := map[string]any{
-			keyType:    strings.ToUpper(mediaType),
+			keyType:    strings.ToUpper(g.mediaType),
 			keyPage:    page,
 			keyPerPage: perPage,
 		}
+		baseVars := len(vars)
 
 		if len(args) > 0 {
 			vars["search"] = strings.Join(args, " ")
@@ -57,19 +56,17 @@ var searchCmd = &cobra.Command{
 			vars["averageScore_greater"] = minScore
 		}
 
-		if len(vars) <= 2 {
-			fmt.Fprintln(os.Stderr, "error: provide at least a search query or one filter flag")
-			return fmt.Errorf("no search criteria provided")
+		if len(vars) == baseVars {
+			return fmt.Errorf("provide at least a search query or one filter flag")
 		}
 
-		client := anilist.New()
+		client := newClient()
 		result, err := client.Query(context.Background(), anilist.QuerySearch, vars)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
 			return err
 		}
 
-		return printMedia(result.Media, asJSON, lang, noColor, mediaType)
+		return printMedia(cmd.OutOrStdout(), result.Media, g.asJSON, g.lang, g.noColor, g.mediaType)
 	},
 }
 
@@ -96,6 +93,6 @@ func init() {
 	searchCmd.Flags().String("status", "", "status: airing, finished, upcoming")
 	searchCmd.Flags().Int("min-score", 0, "minimum average score (0-100)")
 	searchCmd.Flags().Int(keyPage, 1, "page number")
-	searchCmd.Flags().Int("per-page", 20, "results per page (max 50)")
+	searchCmd.Flags().Int(flagPerPage, 20, "results per page (max 50)")
 	rootCmd.AddCommand(searchCmd)
 }

@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,21 +16,20 @@ var popularCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		season, _ := cmd.Flags().GetString("season")
 		year, _ := cmd.Flags().GetInt("year")
-		page, _ := cmd.Flags().GetInt(keyPage)
-		perPage, _ := cmd.Flags().GetInt("per-page")
-		asJSON, _ := cmd.Flags().GetBool("json")
-		noColor, _ := cmd.Flags().GetBool("no-color")
-		lang, _ := cmd.Flags().GetString("lang")
-		mediaType, _ := cmd.Flags().GetString(keyType)
+		page, perPage, err := pageFlags(cmd)
+		if err != nil {
+			return err
+		}
+		g := getGlobalFlags(cmd)
 
 		vars := map[string]any{
-			keyType:    strings.ToUpper(mediaType),
+			keyType:    strings.ToUpper(g.mediaType),
 			keyPage:    page,
 			keyPerPage: perPage,
 		}
 
 		// Season filtering only applies to anime.
-		if strings.ToUpper(mediaType) != "MANGA" {
+		if strings.ToUpper(g.mediaType) != "MANGA" {
 			if season == "" || year == 0 {
 				s, y := anilist.CurrentSeason()
 				if season == "" {
@@ -46,14 +43,13 @@ var popularCmd = &cobra.Command{
 			vars["seasonYear"] = year
 		}
 
-		client := anilist.New()
+		client := newClient()
 		result, err := client.Query(context.Background(), anilist.QueryPopularSeason, vars)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
 			return err
 		}
 
-		return printMedia(result.Media, asJSON, lang, noColor, mediaType)
+		return printMedia(cmd.OutOrStdout(), result.Media, g.asJSON, g.lang, g.noColor, g.mediaType)
 	},
 }
 
@@ -61,6 +57,6 @@ func init() {
 	popularCmd.Flags().String("season", "", "season: winter, spring, summer, fall (default: current)")
 	popularCmd.Flags().Int("year", 0, "year (default: current year)")
 	popularCmd.Flags().Int(keyPage, 1, "page number")
-	popularCmd.Flags().Int("per-page", 20, "results per page (max 50)")
+	popularCmd.Flags().Int(flagPerPage, 20, "results per page (max 50)")
 	rootCmd.AddCommand(popularCmd)
 }

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The TUI now respects `--no-color` and the `NO_COLOR` environment variable
+- `--per-page` and `top --limit` are clamped to AniList's 50-result cap instead of failing at the API
+- `--page 0` and negative pages are rejected with a clear error
+- `ani search` with no query or filters now errors instead of silently querying everything
+- API errors are printed once instead of twice
+- Rate-limit (429) responses now produce a clear message including the Retry-After value
+- `ani info` on an unknown ID reports "no media found" instead of rendering a blank page
+- Episodes that already aired show "aired" instead of "airing soon"
+- `make tools` works on Go 1.25 (updated gofumpt/goimports pins, goreleaser v2 module path)
+
+### Removed
+- Unused `--verbose` and `--quiet` flags
+
+### Changed
+- Reduced allocations in the TUI render loop (cached width-derived and genre tag styles)
+
 ## [0.4.0] - 2026-05-24
 
 ### Added

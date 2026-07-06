@@ -10,8 +10,6 @@ These flags apply to every command.
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
 | `--help` | `-h` | — | Show help for the current command |
-| `--verbose` | `-v` | `false` | Enable verbose output |
-| `--quiet` | `-q` | `false` | Suppress non-essential output |
 | `--json` | — | `false` | Output results as a JSON array |
 | `--no-color` | — | `false` | Disable ANSI color output |
 | `--lang` | — | `english` | Title language: `romaji`, `english`, or `native` |

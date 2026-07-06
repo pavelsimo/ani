@@ -16,6 +16,7 @@ import (
 type mockTransport struct {
 	statusCode int
 	body       string
+	header     http.Header
 	err        error
 }
 
@@ -23,10 +24,14 @@ func (m *mockTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+	header := m.header
+	if header == nil {
+		header = make(http.Header)
+	}
 	return &http.Response{
 		StatusCode: m.statusCode,
 		Body:       io.NopCloser(strings.NewReader(m.body)),
-		Header:     make(http.Header),
+		Header:     header,
 	}, nil
 }
 
@@ -133,10 +138,27 @@ func TestQuery_APIError(t *testing.T) {
 }
 
 func TestQuery_NonOKStatus(t *testing.T) {
+	client := newTestClient(500, "")
+	_, err := client.Query(context.Background(), anilist.QueryTrending, map[string]any{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "500")
+}
+
+func TestQuery_RateLimited(t *testing.T) {
 	client := newTestClient(429, "")
 	_, err := client.Query(context.Background(), anilist.QueryTrending, map[string]any{})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "429")
+	assert.Contains(t, err.Error(), "rate limited")
+}
+
+func TestQuery_RateLimitedRetryAfter(t *testing.T) {
+	header := make(http.Header)
+	header.Set("Retry-After", "30")
+	hc := &http.Client{Transport: &mockTransport{statusCode: 429, header: header}}
+	client := anilist.NewWithClient(hc)
+	_, err := client.Query(context.Background(), anilist.QueryTrending, map[string]any{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "retry after 30 seconds")
 }
 
 func TestQuery_NetworkError(t *testing.T) {
@@ -179,6 +201,13 @@ func TestQueryMedia_APIError(t *testing.T) {
 	_, err := client.QueryMedia(context.Background(), 999)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Media not found")
+}
+
+func TestQueryMedia_NullMedia(t *testing.T) {
+	client := newTestClient(200, `{"data":{"Media":null}}`)
+	_, err := client.QueryMedia(context.Background(), 42)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no media found with ID 42")
 }
 
 func TestQueryMedia_NonOKStatus(t *testing.T) {

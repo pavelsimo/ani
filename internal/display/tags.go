@@ -24,8 +24,18 @@ var tagBase = lipgloss.NewStyle().
 	MarginRight(1).
 	Bold(false)
 
-// colorForGenre returns a stable color for a genre name.
-func colorForGenre(genre string) color.Color {
+// tagStyles holds one prebuilt style per palette color; building them per
+// render is wasteful in the TUI's hot path.
+var tagStyles = func() []lipgloss.Style {
+	styles := make([]lipgloss.Style, len(genrePalette))
+	for i, c := range genrePalette {
+		styles[i] = tagBase.Foreground(c).Border(lipgloss.RoundedBorder()).BorderForeground(c)
+	}
+	return styles
+}()
+
+// genreStyleIndex returns a stable palette index for a genre name.
+func genreStyleIndex(genre string) int {
 	h := 0
 	for _, c := range genre {
 		h = h*31 + int(c)
@@ -33,16 +43,14 @@ func colorForGenre(genre string) color.Color {
 	if h < 0 {
 		h = -h
 	}
-	return genrePalette[h%len(genrePalette)]
+	return h % len(genrePalette)
 }
 
 // RenderTags returns a space-separated string of styled genre tags.
 func RenderTags(genres []string) string {
 	tags := make([]string, len(genres))
 	for i, g := range genres {
-		color := colorForGenre(g)
-		style := tagBase.Foreground(color).Border(lipgloss.RoundedBorder()).BorderForeground(color)
-		tags[i] = style.Render(strings.ToLower(g))
+		tags[i] = tagStyles[genreStyleIndex(g)].Render(strings.ToLower(g))
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Center, tags...)
 }

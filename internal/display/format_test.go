@@ -104,6 +104,8 @@ func TestNextEp(t *testing.T) {
 	assert.Equal(t, "Ep 5 in 2d", NextEp(&anilist.AiringEpisode{Episode: 5, TimeUntilAiring: 172800}))
 	assert.Equal(t, "Ep 3 in 5h", NextEp(&anilist.AiringEpisode{Episode: 3, TimeUntilAiring: 18000}))
 	assert.Equal(t, "Ep 7 airing soon", NextEp(&anilist.AiringEpisode{Episode: 7, TimeUntilAiring: 0}))
+	assert.Equal(t, "Ep 9 aired", NextEp(&anilist.AiringEpisode{Episode: 9, TimeUntilAiring: -3600}))
+	assert.Equal(t, "Ep 2 aired", NextEp(&anilist.AiringEpisode{Episode: 2, TimeUntilAiring: -200000}))
 }
 
 func TestTruncate(t *testing.T) {

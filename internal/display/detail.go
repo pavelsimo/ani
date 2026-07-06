@@ -61,7 +61,7 @@ func RenderDetailWithOptions(media anilist.Media, lang string, opts DetailOption
 	// Info grid — single column, label padded to 11 chars
 	type kv struct{ label, value string }
 	var fields []kv
-	if strings.ToUpper(opts.MediaType) == mediaTypeMANGA {
+	if strings.ToUpper(opts.MediaType) == mediaTypeManga {
 		fields = []kv{
 			{colFormat, Format(media.Format)},
 			{"Chapters", Chapters(media.Chapters)},

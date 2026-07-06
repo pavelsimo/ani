@@ -67,16 +67,16 @@ make tools        # install all development tools
 - `SilenceUsage: true` on every `cobra.Command` with a `RunE`
 - Flag names are lowercase hyphenated (never camelCase)
 - Respect `NO_COLOR` env and `--no-color` flag everywhere color is used
-- `--lang romaji|english` controls title display (default: romaji)
+- `--lang romaji|english|native` controls title display (default: english)
 - `--json` produces JSON array to stdout; human table is a rendering layer on the same structs
 
 ## TUI Architecture
 
-- Entry point: `tui.Start(client, lang)` in `internal/tui/model.go`
+- Entry point: `tui.Start(client, lang, mediaType, noColor)` in `internal/tui/model.go`
 - Tabs: Trending (0), Popular (1), Upcoming (2), All Time (3), Top 100 (4), Search (5)
 - Data is lazy-loaded per tab on first activation
 - Search modal activated with `/`; executes on Enter, cancels on Esc
-- All lipgloss styles are defined in `internal/tui/styles.go` — edit there, nowhere else
+- All TUI lipgloss styles are defined in `internal/tui/styles.go` — edit there, nowhere else; the `display` package owns its own render styles since it serves both the CLI and the TUI
 - Key bindings are defined in `internal/tui/keys.go`
 
 ## Testing Guidelines

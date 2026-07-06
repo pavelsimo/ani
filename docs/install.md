@@ -18,7 +18,7 @@ This is the recommended method. Tap updates are automatic with `brew upgrade`.
 go install github.com/pavelsimo/ani@latest
 ```
 
-Requires Go 1.21 or later. The binary lands in `$GOPATH/bin`.
+Requires Go 1.25 or later. The binary lands in `$GOPATH/bin`.
 
 ## Prebuilt binary
 

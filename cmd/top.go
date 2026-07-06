@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,29 +15,23 @@ var topCmd = &cobra.Command{
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		limit, _ := cmd.Flags().GetInt("limit")
-		page, _ := cmd.Flags().GetInt(keyPage)
-		asJSON, _ := cmd.Flags().GetBool("json")
-		noColor, _ := cmd.Flags().GetBool("no-color")
-		lang, _ := cmd.Flags().GetString("lang")
-		mediaType, _ := cmd.Flags().GetString(keyType)
-
-		perPage := limit
-		if perPage > 50 {
-			perPage = 50
+		page, _, err := pageFlags(cmd)
+		if err != nil {
+			return err
 		}
+		g := getGlobalFlags(cmd)
 
-		client := anilist.New()
+		client := newClient()
 		result, err := client.Query(context.Background(), anilist.QueryTop, map[string]any{
-			keyType:    strings.ToUpper(mediaType),
+			keyType:    strings.ToUpper(g.mediaType),
 			keyPage:    page,
-			keyPerPage: perPage,
+			keyPerPage: clampPerPage(limit),
 		})
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
 			return err
 		}
 
-		return printMedia(result.Media, asJSON, lang, noColor, mediaType)
+		return printMedia(cmd.OutOrStdout(), result.Media, g.asJSON, g.lang, g.noColor, g.mediaType)
 	},
 }
 

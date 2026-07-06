@@ -135,6 +135,8 @@ func NextEp(ep *anilist.AiringEpisode) string {
 	days := ep.TimeUntilAiring / 86400
 	hours := (ep.TimeUntilAiring % 86400) / 3600
 	switch {
+	case ep.TimeUntilAiring < 0:
+		return fmt.Sprintf("Ep %d aired", ep.Episode)
 	case days > 0:
 		return fmt.Sprintf("Ep %d in %dd", ep.Episode, days)
 	case hours > 0:

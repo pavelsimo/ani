@@ -5,10 +5,10 @@ VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "d
 LDFLAGS   := -ldflags "-X $(MODULE)/cmd.Version=$(VERSION)"
 
 GOLANGCI_LINT_VERSION := v2.12.2
-GOFUMPT_VERSION       := v0.7.0
-GOIMPORTS_VERSION     := v0.29.0
+GOFUMPT_VERSION       := v0.10.0
+GOIMPORTS_VERSION     := v0.47.0
 
-.PHONY: build install test coverage lint fmt fmt-check docs ci release clean tools
+.PHONY: build install test coverage coverage-check lint fmt fmt-check docs ci release clean tools
 
 build: ## Build binary to bin/
 	@mkdir -p $(BUILD_DIR)
@@ -22,6 +22,9 @@ test: ## Run tests with coverage
 
 coverage: test ## Open coverage report in browser
 	go tool cover -html=coverage.out
+
+coverage-check: test ## Fail if total coverage < 70%
+	@go tool cover -func=coverage.out | awk '/^total:/ {sub(/%/,"",$$3); if ($$3+0 < 70) {printf "coverage %.1f%% is below the 70%% gate\n", $$3; exit 1} else printf "coverage %.1f%% (gate: 70%%)\n", $$3}'
 
 lint: ## Run golangci-lint
 	golangci-lint run ./...
@@ -37,7 +40,7 @@ fmt-check: ## Check formatting (CI-safe, exits non-zero if dirty)
 docs: ## Build documentation site
 	node scripts/build-docs-site.mjs
 
-ci: fmt-check lint test build ## Full CI gate
+ci: fmt-check lint coverage-check build ## Full CI gate
 
 release: ## Cut a release with goreleaser (requires GITHUB_TOKEN)
 	goreleaser release --clean
@@ -50,7 +53,7 @@ tools: ## Install development tools
 	go install golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION)
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 	go install github.com/evilmartians/lefthook@latest
-	go install github.com/goreleaser/goreleaser@latest
+	go install github.com/goreleaser/goreleaser/v2@latest
 	lefthook install
 
 help: ## Show this help

@@ -23,22 +23,15 @@ func TestRenderTags_SingleGenre(t *testing.T) {
 	assert.Contains(t, strings.ToLower(got), "comedy")
 }
 
-func TestColorForGenre_Stable(t *testing.T) {
-	c1 := colorForGenre("Action")
-	c2 := colorForGenre("Action")
-	assert.Equal(t, c1, c2)
+func TestGenreStyleIndex_Stable(t *testing.T) {
+	assert.Equal(t, genreStyleIndex("Action"), genreStyleIndex("Action"))
 }
 
-func TestColorForGenre_NoPanic(t *testing.T) {
-	assert.NotPanics(t, func() { colorForGenre("") })
-	assert.NotPanics(t, func() { colorForGenre("Action") })
-	assert.NotPanics(t, func() { colorForGenre("Sci-Fi & Cyberpunk") })
-}
-
-func TestColorForGenre_DifferentGenres(t *testing.T) {
-	// Different genres may map to different palette entries — just ensure no crash
-	genres := []string{"Action", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Sci-Fi"}
+func TestGenreStyleIndex_InRange(t *testing.T) {
+	genres := []string{"", "Action", "Comedy", "Drama", "Fantasy", "Horror", "Mystery", "Romance", "Sci-Fi & Cyberpunk"}
 	for _, g := range genres {
-		assert.NotPanics(t, func() { colorForGenre(g) })
+		idx := genreStyleIndex(g)
+		assert.GreaterOrEqual(t, idx, 0)
+		assert.Less(t, idx, len(genrePalette))
 	}
 }

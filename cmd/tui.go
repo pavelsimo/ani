@@ -3,14 +3,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/pavelsimo/ani/internal/anilist"
 	"github.com/pavelsimo/ani/internal/tui"
 )
 
+// Running ani with no subcommand launches the TUI.
 func init() {
 	rootCmd.RunE = func(cmd *cobra.Command, args []string) error {
-		lang, _ := cmd.Flags().GetString("lang")
-		mediaType, _ := cmd.Flags().GetString("type")
-		return tui.Start(anilist.New(), lang, mediaType)
+		g := getGlobalFlags(cmd)
+		return tui.Start(newClient(), g.lang, g.mediaType, g.noColor)
 	}
 }

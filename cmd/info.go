@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
 
-	"github.com/pavelsimo/ani/internal/anilist"
 	"github.com/pavelsimo/ani/internal/display"
 )
 
@@ -21,30 +19,26 @@ var infoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		id, err := strconv.Atoi(args[0])
 		if err != nil || id <= 0 {
-			fmt.Fprintln(os.Stderr, "error: AniList ID must be a positive integer")
-			return fmt.Errorf("invalid AniList ID: %s", args[0])
+			return fmt.Errorf("AniList ID must be a positive integer, got %q", args[0])
 		}
 
-		asJSON, _ := cmd.Flags().GetBool("json")
-		noColor, _ := cmd.Flags().GetBool("no-color")
-		lang, _ := cmd.Flags().GetString("lang")
+		g := getGlobalFlags(cmd)
 
-		client := anilist.New()
+		client := newClient()
 		media, err := client.QueryMedia(context.Background(), id)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
 			return err
 		}
 
-		if asJSON {
-			return json.NewEncoder(os.Stdout).Encode(media)
+		if g.asJSON {
+			return json.NewEncoder(cmd.OutOrStdout()).Encode(media)
 		}
-		fmt.Print(display.RenderDetailWithOptions(*media, lang, display.DetailOptions{
+		_, err = fmt.Fprint(cmd.OutOrStdout(), display.RenderDetailWithOptions(*media, g.lang, display.DetailOptions{
 			Width:     80,
-			NoColor:   noColor,
+			NoColor:   g.noColor,
 			MediaType: media.Type,
 		}))
-		return nil
+		return err
 	},
 }
 

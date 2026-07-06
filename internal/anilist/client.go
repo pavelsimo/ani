@@ -85,33 +85,39 @@ type mediaData struct {
 	Media mediaDetailRaw `json:"Media"`
 }
 
-// Query executes a GraphQL query and returns the Page result.
-func (c *Client) Query(ctx context.Context, query string, vars map[string]any) (*Page, error) {
+// do executes a GraphQL request and unmarshals the data payload into out.
+func (c *Client) do(ctx context.Context, query string, vars map[string]any, out any) error {
 	body, err := json.Marshal(gqlRequest{Query: query, Variables: vars})
 	if err != nil {
-		return nil, fmt.Errorf("marshal request: %w", err)
+		return fmt.Errorf("marshal request: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL, bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("execute request: %w", err)
+		return fmt.Errorf("execute request: %w", err)
 	}
 	defer resp.Body.Close() //nolint:errcheck
 
+	if resp.StatusCode == http.StatusTooManyRequests {
+		if ra := resp.Header.Get("Retry-After"); ra != "" {
+			return fmt.Errorf("rate limited by AniList (90 req/min), retry after %s seconds", ra)
+		}
+		return fmt.Errorf("rate limited by AniList (90 req/min), try again shortly")
+	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
+		return fmt.Errorf("API returned status %d", resp.StatusCode)
 	}
 
 	var result gqlResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
+		return fmt.Errorf("decode response: %w", err)
 	}
 
 	if len(result.Errors) > 0 {
@@ -119,57 +125,32 @@ func (c *Client) Query(ctx context.Context, query string, vars map[string]any) (
 		for i, e := range result.Errors {
 			msgs[i] = e.Message
 		}
-		return nil, fmt.Errorf("API errors: %s", strings.Join(msgs, "; "))
+		return fmt.Errorf("API errors: %s", strings.Join(msgs, "; "))
 	}
 
+	if err := json.Unmarshal(result.Data, out); err != nil {
+		return fmt.Errorf("decode data: %w", err)
+	}
+	return nil
+}
+
+// Query executes a GraphQL query and returns the Page result.
+func (c *Client) Query(ctx context.Context, query string, vars map[string]any) (*Page, error) {
 	var data pageData
-	if err := json.Unmarshal(result.Data, &data); err != nil {
-		return nil, fmt.Errorf("decode page: %w", err)
+	if err := c.do(ctx, query, vars, &data); err != nil {
+		return nil, err
 	}
-
 	return &data.Page, nil
 }
 
 // QueryMedia fetches full detail for a single anime by AniList ID.
 func (c *Client) QueryMedia(ctx context.Context, id int) (*Media, error) {
-	body, err := json.Marshal(gqlRequest{Query: QueryDetail, Variables: map[string]any{"id": id}})
-	if err != nil {
-		return nil, fmt.Errorf("marshal request: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL, bytes.NewReader(body))
-	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("execute request: %w", err)
-	}
-	defer resp.Body.Close() //nolint:errcheck
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
-	}
-
-	var result gqlResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
-	}
-
-	if len(result.Errors) > 0 {
-		msgs := make([]string, len(result.Errors))
-		for i, e := range result.Errors {
-			msgs[i] = e.Message
-		}
-		return nil, fmt.Errorf("API errors: %s", strings.Join(msgs, "; "))
-	}
-
 	var data mediaData
-	if err := json.Unmarshal(result.Data, &data); err != nil {
-		return nil, fmt.Errorf("decode media: %w", err)
+	if err := c.do(ctx, QueryDetail, map[string]any{"id": id}, &data); err != nil {
+		return nil, err
+	}
+	if data.Media.ID == 0 {
+		return nil, fmt.Errorf("no media found with ID %d", id)
 	}
 
 	raw := data.Media

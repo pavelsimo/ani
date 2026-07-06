@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	lipgloss "charm.land/lipgloss/v2"
@@ -11,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/colorprofile"
 
 	"github.com/pavelsimo/ani/internal/anilist"
 	"github.com/pavelsimo/ani/internal/display"
@@ -50,6 +52,7 @@ type Model struct {
 	client    *anilist.Client
 	lang      string
 	mediaType string
+	noColor   bool
 	width     int
 	height    int
 	activeTab int
@@ -73,10 +76,16 @@ type Model struct {
 	detailErr     error
 	detailMedia   *anilist.Media
 	vp            viewport.Model
+
+	// Width-derived styles, cached on resize; deriving them per item per
+	// frame allocates in the render hot path.
+	styleTabBar       lipgloss.Style
+	styleItemSelected lipgloss.Style
+	styleItemNormal   lipgloss.Style
 }
 
 // New creates a new TUI model.
-func New(client *anilist.Client, lang string, mediaType string) Model {
+func New(client *anilist.Client, lang, mediaType string, noColor bool) Model {
 	ti := textinput.New()
 	ti.Placeholder = "search anime…"
 	ti.CharLimit = 120
@@ -88,6 +97,7 @@ func New(client *anilist.Client, lang string, mediaType string) Model {
 		client:      client,
 		lang:        lang,
 		mediaType:   strings.ToUpper(mediaType),
+		noColor:     noColor,
 		searchInput: ti,
 		spinner:     sp,
 	}
@@ -110,10 +120,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.styleTabBar = tabBar.Width(m.width)
+		m.styleItemSelected = itemSelected.Width(m.width - 2)
+		m.styleItemNormal = itemNormal.Width(m.width - 2)
 		if m.detailMode && m.detailMedia != nil {
 			m.vp.Width = m.detailVPWidth()
 			m.vp.Height = m.detailVPHeight()
-			m.vp.SetContent(display.RenderDetailWithOptions(*m.detailMedia, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true, MediaType: m.mediaType}))
+			m.vp.SetContent(display.RenderDetailWithOptions(*m.detailMedia, m.lang, display.DetailOptions{Width: m.detailVPWidth(), NoColor: m.noColor, SkipTitle: true, MediaType: m.mediaType}))
 		}
 
 	case spinner.TickMsg:
@@ -146,7 +159,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.detailMedia = &msg.media
 			m.vp = viewport.New(m.detailVPWidth(), m.detailVPHeight())
-			m.vp.SetContent(display.RenderDetailWithOptions(msg.media, m.lang, display.DetailOptions{Width: m.detailVPWidth(), SkipTitle: true, MediaType: m.mediaType}))
+			m.vp.SetContent(display.RenderDetailWithOptions(msg.media, m.lang, display.DetailOptions{Width: m.detailVPWidth(), NoColor: m.noColor, SkipTitle: true, MediaType: m.mediaType}))
 		}
 
 	case tea.KeyMsg:
@@ -325,7 +338,7 @@ func (m Model) viewTabBar() string {
 		}
 	}
 	bar := lipgloss.JoinHorizontal(lipgloss.Top, tabs...)
-	return tabBar.Width(m.width).Render(bar)
+	return m.styleTabBar.Render(bar)
 }
 
 func (m Model) viewContent() string {
@@ -374,9 +387,9 @@ func (m Model) viewList(tab, height int) string {
 	for i := start; i < end; i++ {
 		item := m.renderItem(media[i])
 		if i == cursor {
-			sb.WriteString(itemSelected.Width(m.width - 2).Render(item))
+			sb.WriteString(m.styleItemSelected.Render(item))
 		} else {
-			sb.WriteString(itemNormal.Width(m.width - 2).Render(item))
+			sb.WriteString(m.styleItemNormal.Render(item))
 		}
 		sb.WriteString("\n")
 	}
@@ -578,9 +591,15 @@ func (m Model) viewDetail() string {
 }
 
 // Start launches the TUI.
-func Start(client *anilist.Client, lang string, mediaType string) error {
-	m := New(client, lang, mediaType)
-	p := tea.NewProgram(m, tea.WithAltScreen())
+func Start(client *anilist.Client, lang, mediaType string, noColor bool) error {
+	m := New(client, lang, mediaType, noColor)
+	// colorprofile.Writer downsamples styling to what the terminal supports
+	// and honors NO_COLOR / CLICOLOR_FORCE.
+	w := colorprofile.NewWriter(os.Stdout, os.Environ())
+	if noColor {
+		w.Profile = colorprofile.ASCII // strip colors, keep layout
+	}
+	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithOutput(w))
 	_, err := p.Run()
 	return err
 }

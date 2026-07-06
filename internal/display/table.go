@@ -25,11 +25,10 @@ var (
 )
 
 const (
-	mediaTypeMANGA = "MANGA"
-	colFormat      = "Format"
-	colStatus      = "Status"
-	colScore       = "Score"
-	colUsers       = "Users"
+	colFormat = "Format"
+	colStatus = "Status"
+	colScore  = "Score"
+	colUsers  = "Users"
 )
 
 // Render produces a lipgloss table string from a slice of media entries.
@@ -42,7 +41,7 @@ func Render(media []anilist.Media, lang string, noColor bool, mediaType string) 
 	var headers []string
 	rows := make([][]string, len(media))
 
-	if strings.ToUpper(mediaType) == mediaTypeMANGA {
+	if strings.ToUpper(mediaType) == mediaTypeManga {
 		headers = []string{"Title", "Genres", colScore, colUsers, colFormat, "Chs", "Vols", colStatus}
 		for i, m := range media {
 			rows[i] = []string{
